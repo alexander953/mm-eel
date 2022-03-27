@@ -26,6 +26,7 @@ if config.getboolean('SETUP', 'INSTALL'):
     config.write(configFile)
 
 db = Database()
+tmdbRequests = TmdbRequests() 
 
 eel.init('web')
 
@@ -49,5 +50,25 @@ def checkIfContentExists(tmdbId, type):
   else:
     isMovie = 0
   return db.checkIfContentExists(tmdbId, isMovie)
+
+@eel.expose
+def getSeasonsById(tmdbId):
+  return tmdbRequests.getSeasonsById(tmdbId)
+
+@eel.expose
+def checkIfSeasonExists(tmdbId, number):
+  return db.checkIfSeasonExists(tmdbId, number)
+
+@eel.expose
+def addSeasonByTmdbIdAndNumber(tmdbId, number):
+  db.addSeasonByTmdbIdAndNumber(tmdbId, number)
+
+@eel.expose
+def getSeasonByIdAndNumber(tmdbId, number):
+  return tmdbRequests.getSeasonByIdAndNumber(tmdbId, number)
+
+@eel.expose
+def removeSeasonByIdAndNumber(tmdbId, number):
+  db.removeSeasonByIdAndNumber(tmdbId, number)
 
 eel.start('index.html')

@@ -60,10 +60,13 @@ class Database:
             req = TmdbRequests()
             season = req.getSeasonByIdAndNumber(tmdbId, number)
             season.update({ 'tmdbId': tmdbId })
+            if not season['poster_path']:
+              season['poster_path'] = ''
             self.cur.execute(
                 """INSERT INTO seasons (tmdb_id, number, title, `description`, backdrop_path, air_date)
                     VALUES (:tmdbId, :season_number, :name, :overview, :poster_path, :air_date)""", season
             )
+            self.con.commit()
         except sqlite3.Error as err:
             print("SQLite error: %s" % (" ".join(err.args)))
             print("Exception class is: ", err.__class__)
@@ -146,6 +149,22 @@ class Database:
       try:
         self.cur.execute(
           """DELETE FROM contents WHERE tmdb_id = :tmdbId""", { "tmdbId": tmdbId }
+        )
+        self.con.commit()
+      except sqlite3.Error as err:
+        print("SQLite error: %s" % (" ".join(err.args)))
+        print("Exception class is: ", err.__class__)
+        print("SQLite traceback: ")
+        exc_type, exc_value, exc_tb = sys.exc_info()
+        print(traceback.format_exception(exc_type, exc_value, exc_tb))
+      return None
+  
+    def removeSeasonByIdAndNumber(self, tmdbId, number):
+      self.__init__()
+      try:
+        self.cur.execute(
+            """DELETE FROM seasons WHERE tmdb_id = :tmdbId AND number = :number""",
+            {"tmdbId": tmdbId, "number": number},
         )
         self.con.commit()
       except sqlite3.Error as err:
