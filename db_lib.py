@@ -84,9 +84,10 @@ class Database:
         episode.update({ "tmdbId": tmdbId, "seasonNumber": seasonNumber })
         try:
             self.cur.execute(
-                """INSERT INTO episodes (tmdb_id, season_numbmer, number, title, `description`, backdrop_path, air_date, rating)
+                """INSERT INTO episodes (tmdb_id, season_number, number, title, `description`, backdrop_path, air_date, rating)
                     VALUES (:tmdbId, :seasonNumber, :episode_number, :name, :overview, :still_path, :air_date, :vote_average)""", episode
             )
+            self.con.commit()
         except sqlite3.Error as err:
             print("SQLite error: %s" % (" ".join(err.args)))
             print("Exception class is: ", err.__class__)
@@ -174,3 +175,19 @@ class Database:
         exc_type, exc_value, exc_tb = sys.exc_info()
         print(traceback.format_exception(exc_type, exc_value, exc_tb))
       return None
+    
+    def removeEpisodeByIdAndNumber(self, tmdbId, seasonNumber, number):
+        self.__init__()
+        try:
+            self.cur.execute(
+                """DELETE FROM episodes WHERE tmdb_id = :tmdbId AND season_number = :seasonNumber AND number = :number""",
+                { "tmdbId": tmdbId, "seasonNumber": seasonNumber, "number": number },
+            )
+            self.con.commit()
+        except sqlite3.Error as err:
+            print("SQLite error: %s" % (" ".join(err.args)))
+            print("Exception class is: ", err.__class__)
+            print("SQLite traceback: ")
+            exc_type, exc_value, exc_tb = sys.exc_info()
+            print(traceback.format_exception(exc_type, exc_value, exc_tb))
+        return None

@@ -82,7 +82,7 @@ async function addContentCard(data, type = 'movie') {
   const modalImgSrc = tmdbRequests.getPoster(imagePath, size='w500');
   const title = type == 'movie' ? data.title : data.name;
   const overview = `${data.overview}`;
-  const overviewCropped = `${overview.substring(0, 80)}...`;
+  const overviewCropped = overview.length > 80 ? `${overview.substring(0, 80)}...` : overview;
   const id = data.id;
   let content_date = type == 'movie' ? data.release_date : data.first_air_date;
 
@@ -194,6 +194,7 @@ async function addContentCard(data, type = 'movie') {
     seasonsLabel.classList.add('mt-3');
     seasonsDivider = document.createElement('hr');
     seasonsRow = document.createElement('div');
+    seasonsRow.setAttribute('id', `tv-${id}-seasons`);
     seasonsRow.classList.add('row');
     let seasons = await eel.getSeasonsById(id)();
     seasons.forEach(async function (season) {
@@ -217,7 +218,7 @@ async function addContentCard(data, type = 'movie') {
         seasonImage.src = seasonImageSrc;
       }
       let seasonOverview = season.overview;
-      let seasonOverviewCropped = `${seasonOverview.substring(0, 80)}...`;
+      let seasonOverviewCropped = seasonOverview.length > 80 ? `${seasonOverview.substring(0, 80)}...` : seasonOverview;
       let seasonCardBody = document.createElement('div');
       seasonCardBody.classList.add('card-body');
       let seasonCardTitle = document.createElement('h5');
@@ -265,7 +266,7 @@ async function addContentCard(data, type = 'movie') {
       let seasonModalOverview = document.createElement('p');
       seasonModalOverview.setAttribute('id', `content-${id}-season-${season.season_number}-overview`);
       seasonModalOverview.classList.add('small');
-      seasonModalOverview.innerText = season.overview;
+      seasonModalOverview.innerText = seasonOverview;
       let seasonModalOverviewLabel = document.createElement('label');
       seasonModalOverviewLabel.classList.add('mt-3');
       seasonModalOverviewLabel.setAttribute('for', `content-${id}-season-${season.season_number}-overview`);
@@ -282,9 +283,155 @@ async function addContentCard(data, type = 'movie') {
       seasonModalDateLabel.innerText = 'Erstausstrahlungsjahr';
       let seasonModalDateDivider = document.createElement('hr');
 
+      let episodes = await eel.getEpisodesByIdAndNumber(id, season.season_number)();
+      let episodesLabel = document.createElement('label');
+      episodesLabel.setAttribute('for', `tv-${id}-season-${season.season_number}-episodes`);
+      episodesLabel.innerText = 'Episoden';  
+      episodesLabel.classList.add('mt-3');
+      episodesDivider = document.createElement('hr');
+      let episodesRow = document.createElement('div');
+      episodesRow.setAttribute('id', `tv-${id}-season-${season.season_number}-episodes`);
+      episodesRow.classList.add('row');
+      episodes.forEach(async function (episode) {
+        let episodeContainer = document.createElement('div');
+        episodeContainer.classList.add('col-md-4');
+        let episodeCard = document.createElement('div');
+        episodeCard.classList.add('card');
+        let episodeOwned = await eel.checkIfEpisodeExists(id, season.season_number, episode.episode_number)();
+        if (episodeOwned) {
+          episodeCard.classList.add('text-white', 'bg-dark');
+        }
+        episodeCard.role = 'button';
+        episodeCard.setAttribute('data-bs-toggle', 'modal');
+        episodeCard.setAttribute('data-bs-target', `#content-${id}-season-${season.season_number}-episode-${episode.episode_number}`);
+        let episodeImage;
+        let episodeImageSrc = tmdbRequests.getPoster(episode.still_path);
+        if (episodeImageSrc) {
+          episodeImage = document.createElement('img');
+          episodeImage.classList.add('card-img-top');
+          episodeImage.alt = season.name + ': ' + episode.name
+          episodeImage.src = episodeImageSrc;
+        }
+        let episodeOverview = episode.overview;
+        let episodeOverviewCropped = episodeOverview.length > 80 ? `${episodeOverview.substring(0, 80)}...` : episodeOverview;
+        let episodeCardBody = document.createElement('div');
+        episodeCardBody.classList.add('card-body');
+        let episodeCardTitle = document.createElement('h5');
+        episodeCardTitle.classList.add('card-title');
+        episodeCardTitle.innerText = episode.name;
+        let episodeCardOverview = document.createElement('p');
+        episodeCardOverview.innerText = episodeOverviewCropped;
+        episodeCardOverview.classList.add('card-text', 'small');
+
+        episodeContainer.append(episodeCard);
+        if (episodeImageSrc) {
+          episodeCard.append(episodeImage);
+        }
+        episodeCard.append(episodeCardBody);
+        episodeCardBody.append(episodeCardTitle);
+        episodeCardBody.append(episodeCardOverview);
+        episodesRow.append(episodeContainer);
+
+        let episodeModal = document.createElement('div');
+        episodeModal.classList.add('modal', 'fade');
+        episodeModal.setAttribute('id', `content-${id}-season-${season.season_number}-episode-${episode.episode_number}`);
+        episodeModal.tabIndex = -1;
+        episodeModal.setAttribute('aria-labelledby', `content-${id}-season-${season.season_number}-episode-${episode.episode_number}-title`);
+        episodeModal.setAttribute('aria-hidden', true);
+
+        let episodeModalDialog = document.createElement('div');
+        episodeModalDialog.classList.add('modal-dialog', 'modal-dialog-scrollable');
+        let episodeModalContent = document.createElement('div');
+        episodeModalContent.classList.add('modal-content');
+        let episodeModalHeader = document.createElement('div');
+        episodeModalHeader.classList.add('modal-header');
+        let episodeModalTitle = document.createElement('h5');
+        episodeModalTitle.classList.add('modal-title');
+        episodeModalTitle.setAttribute('id', `content-${id}-season-${season.season_number}-episode-${episode.episode_number}-title`);
+        episodeModalTitle.innerText = episode.name;
+        let episodeModalBody = document.createElement('div');
+        episodeModalBody.classList.add('modal-body');
+        let episodeModalImage;
+        let episodeModalImageSrc = tmdbRequests.getPoster(episode.still_path, 'w500');
+        if (episodeModalImageSrc) {
+          episodeModalImage = document.createElement('img');
+          episodeModalImage.alt = `${season.name}: ${episode.name}`;
+          episodeModalImage.src = episodeModalImageSrc;
+          episodeModalImage.classList.add('w-100');
+        }
+        let episodeModalOverview = document.createElement('p');
+        episodeModalOverview.setAttribute('id', `content-${id}-season-${season.season_number}-episode-${episode.episode_number}-overview`);
+        episodeModalOverview.classList.add('small');
+        episodeModalOverview.innerText = episodeOverview;
+        let episodeModalOverviewLabel = document.createElement('label');
+        episodeModalOverviewLabel.classList.add('mt-3');
+        episodeModalOverviewLabel.setAttribute('for', `content-${id}-season-${season.season_number}-episode-${episode.episode_number}-overview`);
+        episodeModalOverviewLabel.innerText = 'Beschreibung';
+        let episodeModalOverviewDivider = document.createElement('hr');
+        let episodeModalDate = document.createElement('p');
+        episodeModalDate.setAttribute('id', `content-${id}-season-${season.season_number}-episode-${episode.episode_number}-date`);
+        episodeModalDate.classList.add('small');
+        let episodeDate = episode.air_date ? episode.air_date : '';
+        episodeModalDate.innerText = episodeDate.split('-').reverse().join('.');
+        let episodeModalDateLabel = document.createElement('label');
+        episodeModalDateLabel.setAttribute('for', `content-${id}-season-${season.season_number}-episode-${episode.episode_number}-date`);
+        episodeModalDateLabel.classList.add('mt-3');
+        episodeModalDateLabel.innerText = 'Ausstrahlungsjahr';
+        let episodeModalDateDivider = document.createElement('hr');
+
+        let episodeBackButton = document.createElement('button');
+        episodeBackButton.classList.add('btn', 'btn-outline-secondary', 'episode-back');
+        let episodeTitleCropped = season.name > 17 ? season.name.substring(0, 17) : season.name;
+        episodeBackButton.innerText = 'Zurück zu ' + episodeTitleCropped;
+        episodeBackButton.setAttribute('data-bs-toggle', 'modal');
+        episodeBackButton.setAttribute('data-bs-target', `#content-${id}-season-${season.season_number}`);
+        let episodeButton = document.createElement('button');
+        episodeButton.classList.add('btn', 'btn-outline-secondary', 'episode-action');
+        episodeButton.innerText = episodeOwned ? 'Entfernen' : 'Hinzufügen';
+        episodeButton.dataset.action = episodeOwned ? 'remove' : 'add';
+        episodeButton.addEventListener('click', function () {
+          switch (this.dataset.action) {
+            case 'add':
+              eel.addEpisodeByTmdbIdAndNumber(id, season.season_number, episode.episode_number);
+              this.dataset.action = 'remove';
+              this.innerText = 'Entfernen';
+              episodeCard.classList.add('text-white', 'bg-dark');
+              break;
+            case 'remove':
+              eel.removeEpisodeByIdAndNumber(id, season.season_number, episode.episode_number);
+              this.dataset.action = 'add';
+              this.innerText = 'Hinzufügen';
+              episodeCard.classList.remove('text-white', 'bg-dark');
+              break;
+            default:
+              break;
+          }
+        });
+
+        episodeModal.append(episodeModalDialog);
+        episodeModalDialog.append(episodeModalContent);
+        episodeModalContent.append(episodeModalHeader);
+        episodeModalHeader.append(episodeModalTitle);
+        episodeModalHeader.append(episodeBackButton);
+        episodeModalHeader.append(episodeButton);
+        episodeModalContent.append(episodeModalBody);
+        if (episodeImageSrc) {
+          episodeModalBody.append(episodeModalImage);
+        }
+        episodeModalBody.append();
+        episodeModalBody.append(episodeModalOverviewDivider);
+        episodeModalBody.append(episodeModalOverview);
+        episodeModalBody.append(episodeModalDateLabel);
+        episodeModalBody.append(episodeModalDateDivider);
+        episodeModalBody.append(episodeModalDate);
+
+        movieContainer.append(episodeModal);
+      });
+
       let seasonBackButton = document.createElement('button');
       seasonBackButton.classList.add('btn', 'btn-outline-secondary', 'season-back');
-      seasonBackButton.innerText = 'Zurück zu ' + title;
+      let seasonTitleCropped = title.length > 17 ? title.substring(0, 17) + '...' : title;
+      seasonBackButton.innerText = 'Zurück zu ' + seasonTitleCropped;
       seasonBackButton.setAttribute('data-bs-toggle', 'modal');
       seasonBackButton.setAttribute('data-bs-target', `#content-${id}`);
       let seasonButton = document.createElement('button');
@@ -327,11 +474,11 @@ async function addContentCard(data, type = 'movie') {
       seasonModalBody.append(seasonModalDateLabel);
       seasonModalBody.append(seasonModalDateDivider);
       seasonModalBody.append(seasonModalDate);
+      seasonModalBody.append(episodesLabel);
+      seasonModalBody.append(episodesDivider);
+      seasonModalBody.append(episodesRow);
 
-      movieContainer.append(seasonModal);
-    
-      let seasonDetails = await eel.getSeasonByIdAndNumber(id, season.season_number)();
-      console.log(seasonDetails);   
+      movieContainer.append(seasonModal); 
     });
   }
 
@@ -388,9 +535,11 @@ async function addContentCard(data, type = 'movie') {
   movieModalBody.append(movieModalDateLabel);
   movieModalBody.append(movieModalDateDivider);
   movieModalBody.append(movieModalDate);
-  movieModalBody.append(seasonsLabel);
-  movieModalBody.append(seasonsDivider);
-  movieModalBody.append(seasonsRow);
+  if (type == 'tv') {
+    movieModalBody.append(seasonsLabel);
+    movieModalBody.append(seasonsDivider);
+    movieModalBody.append(seasonsRow);
+  }
 
   document.querySelector(`div.${type}`).append(movieContainer);
 }

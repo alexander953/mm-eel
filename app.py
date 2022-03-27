@@ -71,4 +71,20 @@ def getSeasonByIdAndNumber(tmdbId, number):
 def removeSeasonByIdAndNumber(tmdbId, number):
   db.removeSeasonByIdAndNumber(tmdbId, number)
 
+@eel.expose
+def getEpisodesByIdAndNumber(tmdbId, number):
+  return tmdbRequests.getEpisodesByIdAndNumber(tmdbId, number)
+
+@eel.expose
+def checkIfEpisodeExists(tmdbId, seasonNumber, number):
+  return db.checkIfEpisodeExists(tmdbId, seasonNumber, number) 
+
+@eel.expose
+def addEpisodeByTmdbIdAndNumber(tmdbId, seasonNumber, number):
+  db.addEpisodeByTmdbIdAndNumber(tmdbId, seasonNumber, number)
+
+@eel.expose
+def removeEpisodeByIdAndNumber(tmdbId, seasonNumber, number):
+  db.removeEpisodeByIdAndNumber(tmdbId, seasonNumber, number)
+
 eel.start('index.html')
