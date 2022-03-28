@@ -191,3 +191,73 @@ class Database:
             exc_type, exc_value, exc_tb = sys.exc_info()
             print(traceback.format_exception(exc_type, exc_value, exc_tb))
         return None
+    
+    def addLocation(self, parentId, name, description):
+        self.__init__()
+        try:
+            if parentId:
+                self.cur.execute(
+                    """INSERT INTO locations (parent_id, name, description)
+                        VALUES (:parentId, :name, :description)""",
+                    {
+                        "parentId": parentId,
+                        "name": name,
+                        "description": description
+                    }
+                )
+            else:
+                self.cur.execute(
+                    """INSERT INTO locations (name, description)
+                        VALUES (:name, :description)""",
+                    {
+                        "name": name,
+                        "description": description
+                    }
+                )
+            self.con.commit()
+        except sqlite3.Error as err:
+            print("SQLite error: %s" % (" ".join(err.args)))
+            print("Exception class is: ", err.__class__)
+            print("SQLite traceback: ")
+            exc_type, exc_value, exc_tb = sys.exc_info()
+            print(traceback.format_exception(exc_type, exc_value, exc_tb))
+        return None
+    
+    def getLocationsByParentId(self, parentId):
+        self.__init__()
+        try:
+            self.cur.execute(
+                """SELECT id, `name`, `description` FROM locations
+                    WHERE parent_id IS :parentId""",
+                {
+                    "parentId": parentId
+                }
+            )
+            return self.cur.fetchall()
+        except sqlite3.Error as err:
+            print("SQLite error: %s" % (" ".join(err.args)))
+            print("Exception class is: ", err.__class__)
+            print("SQLite traceback: ")
+            exc_type, exc_value, exc_tb = sys.exc_info()
+            print(traceback.format_exception(exc_type, exc_value, exc_tb))
+        return None
+    
+    def removeLocationById(self, id):
+        self.__init__()
+        try:
+            self.cur.execute(
+                """DELETE FROM locations
+                    WHERE id = :id""",
+                {
+                    "id": id
+                }
+            )
+            self.con.commit()
+            return bool(self.cur.fetchone()[0])
+        except sqlite3.Error as err:
+            print("SQLite error: %s" % (" ".join(err.args)))
+            print("Exception class is: ", err.__class__)
+            print("SQLite traceback: ")
+            exc_type, exc_value, exc_tb = sys.exc_info()
+            print(traceback.format_exception(exc_type, exc_value, exc_tb))
+        return None

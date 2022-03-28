@@ -26,7 +26,7 @@ if config.getboolean('SETUP', 'INSTALL'):
     config.write(configFile)
 
 db = Database()
-tmdbRequests = TmdbRequests() 
+tmdbRequests = TmdbRequests()
 
 eel.init('web')
 
@@ -86,5 +86,17 @@ def addEpisodeByTmdbIdAndNumber(tmdbId, seasonNumber, number):
 @eel.expose
 def removeEpisodeByIdAndNumber(tmdbId, seasonNumber, number):
   db.removeEpisodeByIdAndNumber(tmdbId, seasonNumber, number)
+
+@eel.expose
+def addLocation(parentId, name, description):
+  db.addLocation(parentId, name, description)
+
+@eel.expose
+def getLocationsByParentId(parentId):
+  return db.getLocationsByParentId(parentId)
+
+@eel.expose
+def removeLocationById(id):
+  return db.removeLocationById(id)
 
 eel.start('index.html')
