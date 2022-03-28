@@ -199,7 +199,7 @@ async function addContentCard(data, type = 'movie') {
     let seasons = await eel.getSeasonsById(id)();
     seasons.forEach(async function (season) {
       let seasonContainer = document.createElement('div');
-      seasonContainer.classList.add('col-md-4', 'col-sm-6', 'mt-3');
+      seasonContainer.classList.add('col-md-6', 'col-sm-6', 'mt-3');
       let seasonCard = document.createElement('div');
       seasonCard.classList.add('card');
       let seasonOwned = await eel.checkIfSeasonExists(id, season.season_number)();
@@ -294,7 +294,7 @@ async function addContentCard(data, type = 'movie') {
       episodesRow.classList.add('row');
       episodes.forEach(async function (episode) {
         let episodeContainer = document.createElement('div');
-        episodeContainer.classList.add('col-md-4');
+        episodeContainer.classList.add('col-md-6', 'col-sm-6', 'mt-3');
         let episodeCard = document.createElement('div');
         episodeCard.classList.add('card');
         let episodeOwned = await eel.checkIfEpisodeExists(id, season.season_number, episode.episode_number)();
@@ -557,116 +557,3 @@ function stopLoadingAnimation(target) {
 function clearResults(target) {
   document.querySelector(`div.${target}`).innerHTML = '';
 }
-
-document.getElementsByClassName('add-location').addEventListener('click', function (event) {
-  event.preventDefault();
-  let locationName = event.target.closest('form').querySelector('location-name').value;
-  let locationDesc = event.target.closest('form').querySelector('location-desc').value;
-  let locationParentId = event.target.closest('ul').dataset['location-id'];
-
-  locationParentId = locationParentId == 0 ? null : locationParentId;
-  eel.addLocation(locationParentId, locationName, locationDesc);
-});
-
-document.getElementById('add-location').addEventListener('click', function () {
-  let locationName = document.getElementById('location-name').value;
-  let locationDesc = document.getElementById('location-desc').value;
-  eel.addLocation(null, locationName, locationDesc);
-  let newLocation = document.createElement('li');
-  newLocation.classList.add('list-group-item');
-  let newLocationContainer = document.createElement('div');
-  newLocationContainer.classList.add('row');
-  let newLocationName = document.createElement('div');
-  newLocationName.classList.add('col-md-3', 'col-sm-3');
-  newLocationName.innerText = locationName;
-  let newLocationDesc = document.createElement('div');
-  newLocationDesc.classList.add('col-md-9', 'col-sm-9');
-  newLocationDesc.innerText = locationDesc;
-  newLocationContainer.append(newLocationName);
-  newLocationContainer.append(newLocationDesc);
-  newLocation.append(newLocationContainer);
-  document.getElementById('location-list').insertBefore(newLocation, document.getElementById('new-location'));
-});
-
-async function displayLocations(parentId = null) {
-  let locationId = parentId ? parentId : 0
-  let parentLocation = document.querySelector(`ul[data-location-id=${locationId}]`);
-  let locations = await eel.getLocationsByParentId(parentId)();
-  if (locations.length || !parentId) {
-    locations.forEach(function (location) {
-      let locationListItem = document.createElement('li');
-      locationListItem.classList.add('list-group-item');
-      let locationRow = document.createElement('div');
-      locationRow.classList.add('row');
-      let locationName = document.createElement('div');
-      locationName.classList.add('col-3');
-      locationName.innerText = location[1];
-      let locationDesc = document.createElement('div');
-      locationDesc.classList.add('col-8');
-      locationDesc.innerText = location[2];
-      let locationDelete = document.createElement('div');
-      locationDelete.classList.add('col-1');
-      let locationDeleteButton = document.createElement('button');
-      locationDeleteButton.classList.add('btn', 'btn-danger');
-      locationDeleteButton.innerText = 'Löschen';
-      locationDeleteButton.addEventListener('click', async function () {
-        let deleted = await eel.removeLocationById(location[0])();
-        if (deleted) {
-          locationListItem.remove();
-        }
-      });
-      locationListItem.append(locationRow);
-      locationRow.append(locationName);
-      locationRow.append(locationDesc);
-      locationRow.append(locationDelete);
-      locationDelete.append(locationDeleteButton);
-      parentLocation.append(locationListItem);
-    });
-    displayLocationForm(locationId);
-  }
-}
-
-let locationLabelId = 0;
-
-function displayLocationForm(locationId) {
-  let locationListItem = document.createElement('li');
-  locationListItem.classList.add('list-group-item');
-  let locationForm = document.createElement('form');
-  let locationNameGroup = document.createElement('div');
-  locationNameGroup.classList.add('input-group', 'mb-3');
-  let locationNameLabel = document.createElement('span');
-  locationNameLabel.setAttribute('id', `location-name-label-${locationLabelId}`);
-  locationNameLabel.classList.add('input-group-text');
-  let locationNameInput = document.createElement('input');
-  locationNameInput.type = 'text';
-  locationNameInput.classList.add('form-control', 'location-name');
-  locationNameInput.placeholder = 'Bezeichnung des Lagerorts';
-  locationNameInput.ariaLabel = 'Lagerortbezeichnung';
-  locationNameInput.setAttribute('aria-describedby', `location-name-label-${locationLabelId}`);
-  let locationDescGroup = document.createElement('div');
-  locationDescGroup.classList.add('input-group', 'mb-3');
-  let locationDescLabel = document.createElement('span');
-  locationDescLabel.setAttribute('id', `location-desc-label-${locationLabelId}`);
-  locationDescLabel.classList.add('input-group-text');
-  let locationDescInput = document.createElement('textarea');
-  locationDescInput.classList.add('form-control', 'location-desc');
-  locationDescInput.placeholder = 'Beschreibung des Lagerorts';
-  locationDescInput.ariaLabel = 'Lagerortbeschreibung';
-  locationDescInput.setAttribute('aria-describedby', `location-desc-label-${locationLabelId}`);
-  let locationAddButton = document.createElement('button');
-  locationAddButton.classList.add('btn', 'btn-outline-secondary', 'add-location');
-  locationAddButton.type = 'button';
-  locationLabelId++;
-  
-  locationListItem.append(locationForm);
-  locationForm.append(locationNameGroup);
-  locationNameGroup.append(locationNameLabel);
-  locationNameGroup.append(locationNameInput);
-  locationForm.append(locationDescGroup);
-  locationDescGroup.append(locationDescLabel);
-  locationDescGroup.append(locationDescInput);
-  locationForm.append(locationAddButton);
-  document.querySelector(`ul[data-location-id=${locationId}]`).append(locationListItem);
-}
-
-displayLocations(null);

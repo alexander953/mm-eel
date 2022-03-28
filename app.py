@@ -97,6 +97,6 @@ def getLocationsByParentId(parentId):
 
 @eel.expose
 def removeLocationById(id):
-  return db.removeLocationById(id)
+  db.removeLocationById(id)
 
 eel.start('index.html')

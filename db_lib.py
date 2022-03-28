@@ -253,7 +253,6 @@ class Database:
                 }
             )
             self.con.commit()
-            return bool(self.cur.fetchone()[0])
         except sqlite3.Error as err:
             print("SQLite error: %s" % (" ".join(err.args)))
             print("Exception class is: ", err.__class__)
