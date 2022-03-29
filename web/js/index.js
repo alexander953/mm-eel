@@ -1,4 +1,4 @@
-const pages = ['dashboard', 'discover', 'recordings', 'store'];
+const pages = ['dashboard', 'discover', 'recordings', 'store', 'real-store'];
 
 pages.forEach(function (page) {
   document.querySelector(`.nav-link[data-link=${page}]`).addEventListener('click', function (event) {
@@ -556,4 +556,81 @@ function stopLoadingAnimation(target) {
 
 function clearResults(target) {
   document.querySelector(`div.${target}`).innerHTML = '';
+}
+
+async function printLocations(id, parent = '') {
+  let locations = await eel.getLocationsByParentId(id)();
+  locations.forEach(function (location) {
+    console.log(location[0])
+    console.log(parent + location[1] + ': ' + location[2]);
+    printLocations(location[0], location[1] + ' > ');
+  });
+}
+window.onload = async function () {
+  // await eel.addLocation(5, 'Erdgeschoss', 'Dies ist die zweithöchste Ebene.');
+  document.getElementById('store').innerHTML = '';
+  await displayLocations(null);
+};
+
+async function displayLocations(parentId, curLocCollapse = null) {
+  let locations = await eel.getLocationsByParentId(parentId)();
+  let parentLocationId = parentId ? parentId : 0;
+  let parentLocAcc = document.createElement('div');
+  parentLocAcc.id = `acc-loc-${parentLocationId}`;
+  if (parentId == null) {
+    parentLocAcc.classList.add('mt-3');
+  }
+  if (curLocCollapse == null) {
+    document.getElementById('store').append(parentLocAcc);
+  } else {
+    curLocCollapse.querySelector('.card-body').append(parentLocAcc);
+  }
+  locations.forEach(async function (location) {
+    let currentLocationId = location[0];
+    let currentLocationName = location[1];
+    let currentLocactionDesc = location[2];
+    let colLocCurId = `collapse-loc-${currentLocationId}`;
+    let heaLocCurId = `heading-loc-${currentLocationId}`;
+    /**
+     * create location card
+     * 
+     * create location children
+     * 
+     * append to parent location
+     */
+    let currentLocCard = document.createElement('div');
+    currentLocCard.classList.add('card');
+    let currentLocCardHeader = document.createElement('div');
+    currentLocCardHeader.classList.add('card-header');
+    currentLocCardHeader.id = heaLocCurId;
+    let currentLocHeading = document.createElement('h5');
+    currentLocHeading.classList.add('mb-0');
+    let currentLocationLink = document.createElement('a');
+    currentLocationLink.classList.add('nav-link');
+    currentLocationLink.role = 'button';
+    currentLocationLink.setAttribute('data-bs-toggle', 'collapse');
+    currentLocationLink.href = `#${colLocCurId}`;
+    currentLocationLink.ariaExpanded = false;
+    currentLocationLink.setAttribute('aria-controls', colLocCurId);
+    currentLocationLink.innerHTML = currentLocationName;
+    let currentLocationCollapse = document.createElement('div');
+    currentLocationCollapse.classList.add('collapse');
+    currentLocationCollapse.id = colLocCurId;
+    currentLocationCollapse.setAttribute('aria-labelledby', heaLocCurId);
+    let currentLocCardBody = document.createElement('div');
+    currentLocCardBody.classList.add('card-body');
+    let currentLocCardText = document.createElement('p');
+    currentLocCardText.classList.add('card-text');
+    currentLocCardText.innerHTML = currentLocactionDesc;
+
+    parentLocAcc.append(currentLocCard);
+    currentLocCard.append(currentLocCardHeader);
+    currentLocCardHeader.append(currentLocHeading);
+    currentLocHeading.append(currentLocationLink);
+    currentLocCard.append(currentLocationCollapse);
+    currentLocationCollapse.append(currentLocCardBody);
+    currentLocCardBody.append(currentLocCardText);
+
+    await displayLocations(currentLocationId, currentLocationCollapse);
+  });
 }
