@@ -1,4 +1,4 @@
-const pages = ['dashboard', 'discover', 'recordings', 'store', 'real-store'];
+const pages = ['dashboard', 'discover', 'recordings', 'store'];
 
 pages.forEach(function (page) {
   document.querySelector(`.nav-link[data-link=${page}]`).addEventListener('click', function (event) {
@@ -566,11 +566,11 @@ async function printLocations(id, parent = '') {
     printLocations(location[0], location[1] + ' > ');
   });
 }
-window.onload = async function () {
-  // await eel.addLocation(5, 'Erdgeschoss', 'Dies ist die zweithöchste Ebene.');
+
+document.querySelector('.nav-link[data-link=store]').addEventListener('click', async function() {
   document.getElementById('store').innerHTML = '';
-  await displayLocations(null);
-};
+  displayLocations(null);
+});
 
 async function displayLocations(parentId, curLocCollapse = null) {
   let locations = await eel.getLocationsByParentId(parentId)();
@@ -591,13 +591,7 @@ async function displayLocations(parentId, curLocCollapse = null) {
     let currentLocactionDesc = location[2];
     let colLocCurId = `collapse-loc-${currentLocationId}`;
     let heaLocCurId = `heading-loc-${currentLocationId}`;
-    /**
-     * create location card
-     * 
-     * create location children
-     * 
-     * append to parent location
-     */
+
     let currentLocCard = document.createElement('div');
     currentLocCard.classList.add('card');
     let currentLocCardHeader = document.createElement('div');
@@ -615,6 +609,9 @@ async function displayLocations(parentId, curLocCollapse = null) {
     currentLocationLink.innerHTML = currentLocationName;
     let currentLocationCollapse = document.createElement('div');
     currentLocationCollapse.classList.add('collapse');
+    if (localStorage.getItem(`open-location-collapse-${colLocCurId}`)) {
+      currentLocationCollapse.classList.add('show');
+    }
     currentLocationCollapse.id = colLocCurId;
     currentLocationCollapse.setAttribute('aria-labelledby', heaLocCurId);
     let currentLocCardBody = document.createElement('div');
@@ -622,6 +619,13 @@ async function displayLocations(parentId, curLocCollapse = null) {
     let currentLocCardText = document.createElement('p');
     currentLocCardText.classList.add('card-text');
     currentLocCardText.innerHTML = currentLocactionDesc;
+
+    currentLocationCollapse.addEventListener('shown.bs.collapse', function () {
+      localStorage.setItem(`open-location-collapse-${colLocCurId}`, true);
+    });
+    currentLocationCollapse.addEventListener('hidden.bs.collapse', function () {
+      localStorage.removeItem(`open-location-collapse-${colLocCurId}`);
+    })
 
     parentLocAcc.append(currentLocCard);
     currentLocCard.append(currentLocCardHeader);
@@ -632,5 +636,50 @@ async function displayLocations(parentId, curLocCollapse = null) {
     currentLocCardBody.append(currentLocCardText);
 
     await displayLocations(currentLocationId, currentLocationCollapse);
+    await displayAddLocationForm(currentLocCardBody, currentLocationId);
   });
+  if (!parentId) {
+    await displayAddLocationForm(parentLocAcc, parentLocationId);
+  }
+}
+
+async function displayAddLocationForm(target, parentLocationId) {
+  let addLocationForm = document.createElement('form');
+  let locationNameGroup = document.createElement('div');
+  locationNameGroup.classList.add('input-group');
+  let locationNameLabel = document.createElement('span');
+  locationNameLabel.classList.add('input-group-text');
+  locationNameLabel.innerText = 'Bezeichnung';
+  let locationNameInput = document.createElement('input');
+  locationNameInput.type = 'text';
+  locationNameInput.classList.add('form-control');
+  let locationDescGroup = document.createElement('div');
+  locationDescGroup.classList.add('input-group');
+  let locationDescLabel = document.createElement('span');
+  locationDescLabel.classList.add('input-group-text');
+  locationDescLabel.innerText = 'Beschreibung';
+  let locationDescInput = document.createElement('textarea');
+  locationDescInput.classList.add('form-control');
+  let addLocationButton = document.createElement('button');
+  addLocationButton.classList.add('btn', 'btn-secondary');
+  addLocationButton.innerText = 'Hinzufügen';
+  addLocationButton.addEventListener('click', async function (e) {
+    e.preventDefault();
+    let locationName = locationNameInput.value;
+    if (locationName.length == 0) return;
+    let locationDesc = locationDescInput.value;
+    await eel.addLocation(parentLocationId, locationName, locationDesc);
+    document.getElementById('store').innerHTML = '';
+    displayLocations(null);
+  });
+
+  addLocationForm.append(locationNameGroup);
+  addLocationForm.append(locationDescGroup);
+  addLocationForm.append(addLocationButton);
+  locationNameGroup.append(locationNameLabel);
+  locationNameGroup.append(locationNameInput);
+  locationDescGroup.append(locationDescLabel);
+  locationDescGroup.append(locationDescInput);
+
+  target.append(addLocationForm);
 }
