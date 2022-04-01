@@ -253,6 +253,38 @@ class Database:
                 }
             )
             self.con.commit()
+            toDelete = self.getLocationIdsForParentId(id)
+            while (len(toDelete) > 0):
+                for delId in toDelete:
+                    self.__init__()
+                    self.cur.execute(
+                        """DELETE FROM locations
+                            WHERE id = :id""",
+                        {
+                            "id": delId
+                        }
+                    )
+                    self.con.commit()
+                toDelete = self.getLocationIdsForParentId(delId)
+        except sqlite3.Error as err:
+            print("SQLite error: %s" % (" ".join(err.args)))
+            print("Exception class is: ", err.__class__)
+            print("SQLite traceback: ")
+            exc_type, exc_value, exc_tb = sys.exc_info()
+            print(traceback.format_exception(exc_type, exc_value, exc_tb))
+        return None
+    
+    def getLocationIdsForParentId(self, parentId):
+        self.__init__()
+        try:
+            self.cur.execute(
+                """SELECT id FROM locations
+                    WHERE parent_id = :parentId;""",
+                {
+                    "parentId": parentId
+                }
+            )
+            return [id[0] for id in self.cur.fetchall()]
         except sqlite3.Error as err:
             print("SQLite error: %s" % (" ".join(err.args)))
             print("Exception class is: ", err.__class__)

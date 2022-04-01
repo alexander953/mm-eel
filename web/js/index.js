@@ -588,14 +588,14 @@ async function displayLocations(parentId, curLocCollapse = null) {
   locations.forEach(async function (location) {
     let currentLocationId = location[0];
     let currentLocationName = location[1];
-    let currentLocactionDesc = location[2];
+    let currentLocationDesc = location[2];
     let colLocCurId = `collapse-loc-${currentLocationId}`;
     let heaLocCurId = `heading-loc-${currentLocationId}`;
 
     let currentLocCard = document.createElement('div');
     currentLocCard.classList.add('card');
     let currentLocCardHeader = document.createElement('div');
-    currentLocCardHeader.classList.add('card-header');
+    currentLocCardHeader.classList.add('card-header', 'd-flex', 'justify-content-between', 'align-items-center');
     currentLocCardHeader.id = heaLocCurId;
     let currentLocHeading = document.createElement('h5');
     currentLocHeading.classList.add('mb-0');
@@ -609,7 +609,7 @@ async function displayLocations(parentId, curLocCollapse = null) {
     currentLocationLink.innerHTML = currentLocationName;
     let currentLocationCollapse = document.createElement('div');
     currentLocationCollapse.classList.add('collapse');
-    if (localStorage.getItem(`open-location-collapse-${colLocCurId}`)) {
+    if (localStorage.getItem(`open-collapse-${colLocCurId}`)) {
       currentLocationCollapse.classList.add('show');
     }
     currentLocationCollapse.id = colLocCurId;
@@ -618,18 +618,28 @@ async function displayLocations(parentId, curLocCollapse = null) {
     currentLocCardBody.classList.add('card-body');
     let currentLocCardText = document.createElement('p');
     currentLocCardText.classList.add('card-text');
-    currentLocCardText.innerHTML = currentLocactionDesc;
+    currentLocCardText.innerHTML = currentLocationDesc;
+    let currentLocDeleteButton = document.createElement('button');
+    currentLocDeleteButton.classList.add('btn', 'btn-danger');
+    currentLocDeleteButton.innerText = 'Entfernen';
+    currentLocDeleteButton.addEventListener('click', function () {
+      eel.removeLocationById(currentLocationId);
+      localStorage.removeItem(`open-collapse-${colLocCurId}`);
+      document.getElementById('store').innerHTML = '';
+      displayLocations(null);
+    });
 
     currentLocationCollapse.addEventListener('shown.bs.collapse', function () {
-      localStorage.setItem(`open-location-collapse-${colLocCurId}`, true);
+      localStorage.setItem(`open-collapse-${colLocCurId}`, true);
     });
     currentLocationCollapse.addEventListener('hidden.bs.collapse', function () {
-      localStorage.removeItem(`open-location-collapse-${colLocCurId}`);
+      localStorage.removeItem(`open-collapse-${colLocCurId}`);
     })
 
     parentLocAcc.append(currentLocCard);
     currentLocCard.append(currentLocCardHeader);
     currentLocCardHeader.append(currentLocHeading);
+    currentLocCardHeader.append(currentLocDeleteButton);
     currentLocHeading.append(currentLocationLink);
     currentLocCard.append(currentLocationCollapse);
     currentLocationCollapse.append(currentLocCardBody);

@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS locations (
     created_on DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_on DATETIME DEFAULT CURRENT_TIMESTAMP,
     CHECK (`name` <> ''),
-    FOREIGN KEY (parent_id) REFERENCES locations(id)
+    FOREIGN KEY (parent_id) REFERENCES locations(id) ON DELETE CASCADE
 );
 
 /* Create relations */
