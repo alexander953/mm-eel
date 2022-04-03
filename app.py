@@ -109,7 +109,7 @@ def addSeasonsStorement(tmdbId, seasonNumber, locationId, **kwargs):
 
 @eel.expose
 def addEpisodesStorement(tmdbId, seasonNumber, episodeNumber, locationId, **kwargs):
-  db.addEpisodesStorement(tmdbId, seasonNumber, episodeNumber, locationId, **kwargs):
+  db.addEpisodesStorement(tmdbId, seasonNumber, episodeNumber, locationId, **kwargs)
 
 @eel.expose
 def removeContentsStorement(tmdbId, isMovie, locationId):
