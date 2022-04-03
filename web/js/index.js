@@ -693,3 +693,15 @@ async function displayAddLocationForm(target, parentLocationId) {
 
   target.append(addLocationForm);
 }
+
+async function addContentsStorement(tmdbId, isMovie, locationId, amount = 1, recordingDate = null, notes = '') {
+  await eel.addContentsStorement(tmdbId, isMovie, locationId, amount, recordingDate, notes);
+}
+
+async function addSeasonsStorement(tmdbId, seasonNumber, locationId, amount = 1, recordingDate = null, notes = '') {
+  await eel.addSeasonsStorement(tmdbId, seasonNumber, locationId, amount, recordingDate, notes);
+}
+
+async function addEpisodesStorement(tmdbId, seasonNumber, episodeNumber, locationId, amount = 1, recordingDate = null, notes = '') {
+  await eel.addEpisodesStorement(tmdbId, seasonNumber, episodeNumber, locationId, amount, recordingDate, notes);
+}

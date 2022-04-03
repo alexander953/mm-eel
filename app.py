@@ -100,16 +100,16 @@ def removeLocationById(id):
   db.removeLocationById(id)
 
 @eel.expose
-def addContentsStorement(tmdbId, isMovie, locationId, **kwargs):
-  db.addContentsStorement(tmdbId, isMovie, locationId, **kwargs)
+def addContentsStorement(tmdbId, isMovie, locationId, amount, recordingDate, notes):
+  db.addContentsStorement(tmdbId, isMovie, locationId, amount, recordingDate, notes)
 
 @eel.expose
-def addSeasonsStorement(tmdbId, seasonNumber, locationId, **kwargs):
-  db.addSeasonsStorement(tmdbId, seasonNumber, locationId, **kwargs)
+def addSeasonsStorement(tmdbId, seasonNumber, locationId, amount, recordingDate, notes):
+  db.addSeasonsStorement(tmdbId, seasonNumber, locationId, amount, recordingDate, notes)
 
 @eel.expose
-def addEpisodesStorement(tmdbId, seasonNumber, episodeNumber, locationId, **kwargs):
-  db.addEpisodesStorement(tmdbId, seasonNumber, episodeNumber, locationId, **kwargs)
+def addEpisodesStorement(tmdbId, seasonNumber, episodeNumber, locationId, amount, recordingDate, notes):
+  db.addEpisodesStorement(tmdbId, seasonNumber, episodeNumber, locationId, amount, recordingDate, notes)
 
 @eel.expose
 def removeContentsStorement(tmdbId, isMovie, locationId):
