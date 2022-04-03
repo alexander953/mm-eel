@@ -292,3 +292,137 @@ class Database:
             exc_type, exc_value, exc_tb = sys.exc_info()
             print(traceback.format_exception(exc_type, exc_value, exc_tb))
         return None
+    
+    def addContentsStorement(self, tmdbId, isMovie, locationId, amount = 1, recordingDate = None, notes = ''):
+        self.__init__()
+        try:
+            self.cur.execute(
+                """INSERT INTO contents_storement (tmdb_id, is_movie, location_id, amount, recording_date, notes)
+                        VALUES (:tmdbId, :isMovie, :locationId, :amount, :recordingDate, :notes)""",
+                {
+                    "tmdbId": tmdbId,
+                    "isMovie": isMovie,
+                    "locationId": locationId,
+                    "amount": amount,
+                    "recordingDate": recordingDate,
+                    "notes": notes
+                }
+            )
+            self.con.commit()
+        except sqlite3.Error as err:
+            print("SQLite error: %s" % (" ".join(err.args)))
+            print("Exception class is: ", err.__class__)
+            print("SQLite traceback: ")
+            exc_type, exc_value, exc_tb = sys.exc_info()
+            print(traceback.format_exception(exc_type, exc_value, exc_tb))
+        return None
+    
+    def addSeasonsStorement(self, tmdbId, seasonNumber, locationId, amount = 1, recordingDate = None, notes = ''):
+        self.__init__()
+        try:
+            self.cur.execute(
+                """INSERT INTO seasons_storement (tmdb_id, season_number, location_id, amount, recording_date, notes)
+                        VALUES (:tmdbId, :seasonNumber, :locationId, :amount, :recordingDate, :notes)""",
+                {
+                    "tmdbId": tmdbId,
+                    "seasonNumber": seasonNumber,
+                    "locationId": locationId,
+                    "amount": amount,
+                    "recordingDate": recordingDate,
+                    "notes": notes
+                }
+            )
+            self.con.commit()
+        except sqlite3.Error as err:
+            print("SQLite error: %s" % (" ".join(err.args)))
+            print("Exception class is: ", err.__class__)
+            print("SQLite traceback: ")
+            exc_type, exc_value, exc_tb = sys.exc_info()
+            print(traceback.format_exception(exc_type, exc_value, exc_tb))
+        return None
+    
+    def addEpisodesStorement(self, tmdbId, seasonNumber, episodeNumber, locationId, amount = 1, recordingDate = None, notes = ''):
+        self.__init__()
+        try:
+            self.cur.execute(
+                """INSERT INTO episodes_storement (tmdb_id, season_number, episode_number, location_id, amount, recording_date, notes)
+                        VALUES (:tmdbId, :seasonNumber, :episodeNumber, :locationId, :amount, :recordingDate, :notes)""",
+                {
+                    "tmdbId": tmdbId,
+                    "seasonNumber": seasonNumber,
+                    "episodeNumber": episodeNumber,
+                    "locationId": locationId,
+                    "amount": amount,
+                    "recordingDate": recordingDate,
+                    "notes": notes
+                }
+            )
+            self.con.commit()
+        except sqlite3.Error as err:
+            print("SQLite error: %s" % (" ".join(err.args)))
+            print("Exception class is: ", err.__class__)
+            print("SQLite traceback: ")
+            exc_type, exc_value, exc_tb = sys.exc_info()
+            print(traceback.format_exception(exc_type, exc_value, exc_tb))
+        return None
+    
+    def removeContentsStorement(self, tmdbId, isMovie, locationId):
+        self.__init__()
+        try:
+            self.cur.execute(
+                """DELETE FROM contents_storement WHERE tmdb_id = :tmdbId AND is_movie = :isMovie AND location_id = :locationId""",
+                {
+                    "tmdbId": tmdbId,
+                    "isMovie": isMovie,
+                    "locationId": locationId
+                }
+            )
+            self.con.commit()
+        except sqlite3.Error as err:
+            print("SQLite error: %s" % (" ".join(err.args)))
+            print("Exception class is: ", err.__class__)
+            print("SQLite traceback: ")
+            exc_type, exc_value, exc_tb = sys.exc_info()
+            print(traceback.format_exception(exc_type, exc_value, exc_tb))
+        return None
+    
+    def removeSeasonsStorement(self, tmdbId, seasonNumber, locationId):
+        self.__init__()
+        try:
+            self.cur.execute(
+                """DELETE FROM seasons_storement WHERE tmdb_id = :tmdbId AND season_number = :seasonNumber AND location_id = :locationId""",
+                {
+                    "tmdbId": tmdbId,
+                    "seasonNumber": seasonNumber,
+                    "locationId": locationId
+                }
+            )
+            self.con.commit()
+        except sqlite3.Error as err:
+            print("SQLite error: %s" % (" ".join(err.args)))
+            print("Exception class is: ", err.__class__)
+            print("SQLite traceback: ")
+            exc_type, exc_value, exc_tb = sys.exc_info()
+            print(traceback.format_exception(exc_type, exc_value, exc_tb))
+        return None
+    
+    def removeEpisodesStorement(self, tmdbId, seasonNumber, episodeNumber, locationId):
+        self.__init__()
+        try:
+            self.cur.execute(
+                """DELETE FROM episodes_storement WHERE tmdb_id = :tmdbId AND season_number = :seasonNumber AND episode_number = :episodeNumber AND location_id = :locationId""",
+                {
+                    "tmdbId": tmdbId,
+                    "seasonNumber": seasonNumber,
+                    "episodeNumber": episodeNumber,
+                    "locationId": locationId
+                }
+            )
+            self.con.commit()
+        except sqlite3.Error as err:
+            print("SQLite error: %s" % (" ".join(err.args)))
+            print("Exception class is: ", err.__class__)
+            print("SQLite traceback: ")
+            exc_type, exc_value, exc_tb = sys.exc_info()
+            print(traceback.format_exception(exc_type, exc_value, exc_tb))
+        return None

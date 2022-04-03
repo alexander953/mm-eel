@@ -99,4 +99,28 @@ def getLocationsByParentId(parentId):
 def removeLocationById(id):
   db.removeLocationById(id)
 
+@eel.expose
+def addContentsStorement(tmdbId, isMovie, locationId, **kwargs):
+  db.addContentsStorement(tmdbId, isMovie, locationId, **kwargs)
+
+@eel.expose
+def addSeasonsStorement(tmdbId, seasonNumber, locationId, **kwargs):
+  db.addSeasonsStorement(tmdbId, seasonNumber, locationId, **kwargs)
+
+@eel.expose
+def addEpisodesStorement(tmdbId, seasonNumber, episodeNumber, locationId, **kwargs):
+  db.addEpisodesStorement(tmdbId, seasonNumber, episodeNumber, locationId, **kwargs):
+
+@eel.expose
+def removeContentsStorement(tmdbId, isMovie, locationId):
+  db.removeContentsStorement(tmdbId, isMovie, locationId)
+
+@eel.expose
+def removeSeasonsStorement(tmdbId, seasonNumber, locationId):
+  db.removeSeasonsStorement(tmdbId, seasonNumber, locationId)
+
+@eel.expose
+def removeEpisodesStorement(tmdbId, seasonNumber, episodeNumber, locationId):
+  db.removeEpisodesStorement(tmdbId, seasonNumber, episodeNumber, locationId)
+
 eel.start('index.html')
