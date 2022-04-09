@@ -25,11 +25,7 @@ class Database:
             )
             self.con.commit()
         except sqlite3.Error as err:
-            print("SQLite error: %s" % (" ".join(err.args)))
-            print("Exception class is: ", err.__class__)
-            print("SQLite traceback: ")
-            exc_type, exc_value, exc_tb = sys.exc_info()
-            print(traceback.format_exception(exc_type, exc_value, exc_tb))
+            self.handleError(err)
         self.con.close()
 
     def addSeriesByTmdbId(self, tmdbId):
@@ -46,11 +42,7 @@ class Database:
             )
             self.con.commit()
         except sqlite3.Error as err:
-            print("SQLite error: %s" % (" ".join(err.args)))
-            print("Exception class is: ", err.__class__)
-            print("SQLite traceback: ")
-            exc_type, exc_value, exc_tb = sys.exc_info()
-            print(traceback.format_exception(exc_type, exc_value, exc_tb))
+            self.handleError(err)
         self.con.close()
 
      
@@ -68,11 +60,7 @@ class Database:
             )
             self.con.commit()
         except sqlite3.Error as err:
-            print("SQLite error: %s" % (" ".join(err.args)))
-            print("Exception class is: ", err.__class__)
-            print("SQLite traceback: ")
-            exc_type, exc_value, exc_tb = sys.exc_info()
-            print(traceback.format_exception(exc_type, exc_value, exc_tb))
+            self.handleError(err)
         return None
 
     def addEpisodeByTmdbIdAndNumber(self, tmdbId, seasonNumber, number):
@@ -89,11 +77,7 @@ class Database:
             )
             self.con.commit()
         except sqlite3.Error as err:
-            print("SQLite error: %s" % (" ".join(err.args)))
-            print("Exception class is: ", err.__class__)
-            print("SQLite traceback: ")
-            exc_type, exc_value, exc_tb = sys.exc_info()
-            print(traceback.format_exception(exc_type, exc_value, exc_tb))
+            self.handleError(err)
         return None
         
 
@@ -106,11 +90,7 @@ class Database:
             )
             return bool(self.cur.fetchone()[0])
         except sqlite3.Error as err:
-            print("SQLite error: %s" % (" ".join(err.args)))
-            print("Exception class is: ", err.__class__)
-            print("SQLite traceback: ")
-            exc_type, exc_value, exc_tb = sys.exc_info()
-            print(traceback.format_exception(exc_type, exc_value, exc_tb))
+            self.handleError(err)
         return None
 
     def checkIfSeasonExists(self, tmdbId, number):
@@ -122,11 +102,7 @@ class Database:
             )
             return bool(self.cur.fetchone()[0])
         except sqlite3.Error as err:
-            print("SQLite error: %s" % (" ".join(err.args)))
-            print("Exception class is: ", err.__class__)
-            print("SQLite traceback: ")
-            exc_type, exc_value, exc_tb = sys.exc_info()
-            print(traceback.format_exception(exc_type, exc_value, exc_tb))
+            self.handleError(err)
         return None
    
     def checkIfEpisodeExists(self, tmdbId, seasonNumber, number):
@@ -138,11 +114,7 @@ class Database:
             )
             return bool(self.cur.fetchone()[0])
         except sqlite3.Error as err:
-            print("SQLite error: %s" % (" ".join(err.args)))
-            print("Exception class is: ", err.__class__)
-            print("SQLite traceback: ")
-            exc_type, exc_value, exc_tb = sys.exc_info()
-            print(traceback.format_exception(exc_type, exc_value, exc_tb))
+            self.handleError(err)
         return None
     
     def removeContent(self, tmdbId):
@@ -153,11 +125,7 @@ class Database:
         )
         self.con.commit()
       except sqlite3.Error as err:
-        print("SQLite error: %s" % (" ".join(err.args)))
-        print("Exception class is: ", err.__class__)
-        print("SQLite traceback: ")
-        exc_type, exc_value, exc_tb = sys.exc_info()
-        print(traceback.format_exception(exc_type, exc_value, exc_tb))
+        self.handleError(err)
       return None
   
     def removeSeasonByIdAndNumber(self, tmdbId, number):
@@ -169,11 +137,7 @@ class Database:
         )
         self.con.commit()
       except sqlite3.Error as err:
-        print("SQLite error: %s" % (" ".join(err.args)))
-        print("Exception class is: ", err.__class__)
-        print("SQLite traceback: ")
-        exc_type, exc_value, exc_tb = sys.exc_info()
-        print(traceback.format_exception(exc_type, exc_value, exc_tb))
+        self.handleError(err)
       return None
     
     def removeEpisodeByIdAndNumber(self, tmdbId, seasonNumber, number):
@@ -185,11 +149,7 @@ class Database:
             )
             self.con.commit()
         except sqlite3.Error as err:
-            print("SQLite error: %s" % (" ".join(err.args)))
-            print("Exception class is: ", err.__class__)
-            print("SQLite traceback: ")
-            exc_type, exc_value, exc_tb = sys.exc_info()
-            print(traceback.format_exception(exc_type, exc_value, exc_tb))
+            self.handleError(err)
         return None
     
     def addLocation(self, parentId, name, description):
@@ -216,11 +176,7 @@ class Database:
                 )
             self.con.commit()
         except sqlite3.Error as err:
-            print("SQLite error: %s" % (" ".join(err.args)))
-            print("Exception class is: ", err.__class__)
-            print("SQLite traceback: ")
-            exc_type, exc_value, exc_tb = sys.exc_info()
-            print(traceback.format_exception(exc_type, exc_value, exc_tb))
+            self.handleError(err)
         return None
     
     def getLocationsByParentId(self, parentId):
@@ -235,11 +191,7 @@ class Database:
             )
             return self.cur.fetchall()
         except sqlite3.Error as err:
-            print("SQLite error: %s" % (" ".join(err.args)))
-            print("Exception class is: ", err.__class__)
-            print("SQLite traceback: ")
-            exc_type, exc_value, exc_tb = sys.exc_info()
-            print(traceback.format_exception(exc_type, exc_value, exc_tb))
+            self.handleError(err)
         return None
     
     def removeLocationById(self, id):
@@ -267,11 +219,7 @@ class Database:
                     self.con.commit()
                 toDelete = self.getLocationIdsForParentId(delId)
         except sqlite3.Error as err:
-            print("SQLite error: %s" % (" ".join(err.args)))
-            print("Exception class is: ", err.__class__)
-            print("SQLite traceback: ")
-            exc_type, exc_value, exc_tb = sys.exc_info()
-            print(traceback.format_exception(exc_type, exc_value, exc_tb))
+            self.handleError(err)
         return None
     
     def getLocationIdsForParentId(self, parentId):
@@ -286,11 +234,7 @@ class Database:
             )
             return [id[0] for id in self.cur.fetchall()]
         except sqlite3.Error as err:
-            print("SQLite error: %s" % (" ".join(err.args)))
-            print("Exception class is: ", err.__class__)
-            print("SQLite traceback: ")
-            exc_type, exc_value, exc_tb = sys.exc_info()
-            print(traceback.format_exception(exc_type, exc_value, exc_tb))
+            self.handleError(err)
         return None
     
     def addContentsStorement(self, tmdbId, isMovie, locationId, amount = 1, recordingDate = None, notes = ''):
@@ -310,11 +254,7 @@ class Database:
             )
             self.con.commit()
         except sqlite3.Error as err:
-            print("SQLite error: %s" % (" ".join(err.args)))
-            print("Exception class is: ", err.__class__)
-            print("SQLite traceback: ")
-            exc_type, exc_value, exc_tb = sys.exc_info()
-            print(traceback.format_exception(exc_type, exc_value, exc_tb))
+            self.handleError(err)
         return None
     
     def addSeasonsStorement(self, tmdbId, seasonNumber, locationId, amount = 1, recordingDate = None, notes = ''):
@@ -334,11 +274,7 @@ class Database:
             )
             self.con.commit()
         except sqlite3.Error as err:
-            print("SQLite error: %s" % (" ".join(err.args)))
-            print("Exception class is: ", err.__class__)
-            print("SQLite traceback: ")
-            exc_type, exc_value, exc_tb = sys.exc_info()
-            print(traceback.format_exception(exc_type, exc_value, exc_tb))
+            self.handleError(err)
         return None
     
     def addEpisodesStorement(self, tmdbId, seasonNumber, episodeNumber, locationId, amount = 1, recordingDate = None, notes = ''):
@@ -359,11 +295,7 @@ class Database:
             )
             self.con.commit()
         except sqlite3.Error as err:
-            print("SQLite error: %s" % (" ".join(err.args)))
-            print("Exception class is: ", err.__class__)
-            print("SQLite traceback: ")
-            exc_type, exc_value, exc_tb = sys.exc_info()
-            print(traceback.format_exception(exc_type, exc_value, exc_tb))
+            self.handleError(err)
         return None
     
     def removeContentsStorement(self, tmdbId, isMovie, locationId):
@@ -379,11 +311,7 @@ class Database:
             )
             self.con.commit()
         except sqlite3.Error as err:
-            print("SQLite error: %s" % (" ".join(err.args)))
-            print("Exception class is: ", err.__class__)
-            print("SQLite traceback: ")
-            exc_type, exc_value, exc_tb = sys.exc_info()
-            print(traceback.format_exception(exc_type, exc_value, exc_tb))
+            self.handleError(err)
         return None
     
     def removeSeasonsStorement(self, tmdbId, seasonNumber, locationId):
@@ -399,11 +327,7 @@ class Database:
             )
             self.con.commit()
         except sqlite3.Error as err:
-            print("SQLite error: %s" % (" ".join(err.args)))
-            print("Exception class is: ", err.__class__)
-            print("SQLite traceback: ")
-            exc_type, exc_value, exc_tb = sys.exc_info()
-            print(traceback.format_exception(exc_type, exc_value, exc_tb))
+            self.handleError(err)
         return None
     
     def removeEpisodesStorement(self, tmdbId, seasonNumber, episodeNumber, locationId):
@@ -420,9 +344,51 @@ class Database:
             )
             self.con.commit()
         except sqlite3.Error as err:
-            print("SQLite error: %s" % (" ".join(err.args)))
-            print("Exception class is: ", err.__class__)
-            print("SQLite traceback: ")
-            exc_type, exc_value, exc_tb = sys.exc_info()
-            print(traceback.format_exception(exc_type, exc_value, exc_tb))
+            self.handleError(err)
         return None
+    
+    def getRecordings(self):
+        self.__init__()
+        try:
+            self.cur.execute(
+                """SELECT c.title, '', '', c.description, c.release_date, c.age_restricted, c.rating, c.notes, s.notes, s.location_id FROM contents c
+                    INNER JOIN
+                    contents_storement s
+                    ON c.tmdb_id = s.tmdb_id AND c.is_movie = s.is_movie
+                    UNION ALL
+                    SELECT c.title, c.number, '', c.description, c.air_date, '', c.rating, c.notes, s.notes, s.location_id FROM seasons c
+                    INNER JOIN
+                    seasons_storement s
+                    ON c.tmdb_id = s.tmdb_id AND c.number = s.season_number
+                    UNION ALL
+                    SELECT e.title, e.season_number, e.number, e.description, e.air_date, '', e.rating, e.notes, s.notes, s.location_id FROM episodes e
+                    INNER JOIN
+                    episodes_storement s
+                    ON e.tmdb_id = s.tmdb_id AND e.season_number = s.season_number AND e.number = s.episode_number;"""
+            )
+            return self.cur.fetchall()
+        except sqlite3.Error as err:
+            self.handleError(err)
+        return None
+    
+    def getLocationById(self, id):
+        self.__init__()
+        try:
+            self.cur.execute(
+                """SELECT parent_id, name FROM locations
+                    WHERE id = :id""",
+                {
+                    "id": id
+                }
+            )
+            return self.cur.fetchone()
+        except sqlite3.Error as err:
+            self.handleError(err)
+        return None
+    
+    def handleError(self, err):
+        print("SQLite error: %s" % (" ".join(err.args)))
+        print("Exception class is: ", err.__class__)
+        print("SQLite traceback: ")
+        exc_type, exc_value, exc_tb = sys.exc_info()
+        print(traceback.format_exception(exc_type, exc_value, exc_tb))

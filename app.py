@@ -123,4 +123,36 @@ def removeSeasonsStorement(tmdbId, seasonNumber, locationId):
 def removeEpisodesStorement(tmdbId, seasonNumber, episodeNumber, locationId):
   db.removeEpisodesStorement(tmdbId, seasonNumber, episodeNumber, locationId)
 
+@eel.expose
+def getContentsStorement():
+  results = db.getContentsStorement()
+  contentsStorementHeaders = ['tmdb_id', 'is_movie', 'location_id', 'amount', 'recording_date', 'notes', 'created_on', 'updated_on']
+  dictResults = [dict(zip(contentsStorementHeaders, result)) for result in results]
+  return dictResults
+
+@eel.expose
+def getContentByTmdbIdAndIsMovie(tmdbId, isMovie):
+  result = db.getContentByTmdbIdAndIsMovie(tmdbId, isMovie)
+  contentsHeaders = ["tmdb_id", "is_movie", "title", "description", "backdrop_path", "release_date", "age_restricted", "rating", "notes", "created_on", "updated_on"]
+  return dict(zip(contentsHeaders, result))
+
+@eel.expose
+def getRecordings():
+  result = db.getRecordings()
+  return result
+
+@eel.expose
+def getFullLocationById(id):
+  fullLocation = ''
+  # TODO: Move this to config
+  separator = ' / '
+  location = db.getLocationById(id)
+  fullLocation = location[1]
+  parentLocationId = location[0]
+  while parentLocationId:
+    location = db.getLocationById(parentLocationId)
+    fullLocation = location[1] + separator + fullLocation
+    parentLocationId = location[0]
+  return fullLocation
+
 eel.start('index.html')

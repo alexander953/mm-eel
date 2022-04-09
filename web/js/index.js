@@ -705,3 +705,26 @@ async function addSeasonsStorement(tmdbId, seasonNumber, locationId, amount = 1,
 async function addEpisodesStorement(tmdbId, seasonNumber, episodeNumber, locationId, amount = 1, recordingDate = null, notes = '') {
   await eel.addEpisodesStorement(tmdbId, seasonNumber, episodeNumber, locationId, amount, recordingDate, notes);
 }
+
+async function displayRecordings() {
+  let recordings = await eel.getRecordings()();
+  let tableBody = document.getElementById('recordings-data');
+  recordings.forEach(async function (recording) {
+    let tr = document.createElement('tr')
+    console.log(recording)
+    recording.forEach(async function (data, index) {
+      let td = document.createElement('td');
+      let tdContent = '';
+      if (index == 9) {
+        tdContent = await eel.getFullLocationById(data)();
+      } else {
+        tdContent = data;
+      }
+      td.innerText = tdContent;
+      tr.append(td);
+    });
+    tableBody.append(tr);
+  });
+}
+
+displayRecordings();
