@@ -36,7 +36,7 @@
     </nav>
   </header>
   <div class="container">
-    <div class="page d-none" id="dashboard">
+    <div class="page" id="dashboard">
       Dashboard
     </div>
     <div class="page d-none" id="discover">
@@ -66,10 +66,34 @@
         </div>
       </div>
     </div>
-    <div class="page" id="recordings">
+    <div class="page d-none" id="recordings">
+      <form>
+        <div class="input-group mt-3">
+          <span>Aufzeichnung</span>
+          <select id="recording"></select>
+        </div>
+        <div class="input-group mt-3">
+          <span>Lagerort</span>
+          <select id="location"></select>
+        </div>
+        <div class="input-group mt-3">
+          <span>Menge</span>
+          <input id="amount" type="number" value="1" />
+        </div>
+        <div class="input-group mt-3">
+          <span>Aufzeichnungsdatum</span>
+          <input id="recording-date" type="date" />
+        </div>
+        <div class="input-group mt-3">
+          <span>Notizen</span>
+          <textarea id="notes"></textarea>
+        </div>
+        <button class="btn btn-outline-secondary" id="add-recording" type="button">Hinzufügen</button>
+      </form>
       <table class="table">
         <thead>
           <tr>
+            <th></th>
             <th>
               Titel
             </th>
@@ -93,6 +117,12 @@
             </th>
             <th>
               Titelnotizen
+            </th>
+            <th>
+              Menge
+            </th>
+            <th>
+              Aufzeichnungsdatum
             </th>
             <th>
               Lagernotizen

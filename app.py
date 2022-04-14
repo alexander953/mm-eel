@@ -144,6 +144,8 @@ def getRecordings():
 @eel.expose
 def getFullLocationById(id):
   fullLocation = ''
+  if not fullLocation:
+    return ''
   # TODO: Move this to config
   separator = ' / '
   location = db.getLocationById(id)
@@ -154,5 +156,93 @@ def getFullLocationById(id):
     fullLocation = location[1] + separator + fullLocation
     parentLocationId = location[0]
   return fullLocation
+
+@eel.expose
+def getFullLocations():
+  fullLocations = []
+  locationIds = db.getLocations()
+  for locationId in locationIds:
+    id = locationId[0]
+    name = getFullLocationById(id)
+    fullLocations.append((id, name))
+  return fullLocations
+
+@eel.expose
+def updateStorement(data):
+  tmdbId = data['tmdb_id']
+  seasonNumber = data['season_number']
+  episodeNumber = data['episode_number']
+  print(data)
+  index = data['index']
+  value = data['data']
+  locationId = data['location_id']
+
+  if seasonNumber:
+    if episodeNumber:
+      if index < 8:
+        db.updateEpisode(tmdbId, seasonNumber, episodeNumber, index, value)
+      else:
+        db.updateEpisodesStorement(tmdbId, seasonNumber, episodeNumber, locationId, index, value)
+    else:
+      if index < 8:
+        db.updateSeason(tmdbId, seasonNumber, index, value)
+      else:
+        db.updateSeasonsStorement(tmdbId, seasonNumber, locationId, index, value)
+  else:
+    isMovie = data['is_movie']
+    if index < 8:
+      db.updateContent(tmdbId, isMovie, index, value)
+    else:
+      db.updateContentsStorement(tmdbId, isMovie, locationId, index, value)
+
+@eel.expose
+def getPossessions():
+  return db.getPossessions()
+
+@eel.expose
+def addRecording(recording, locationId, amount, recordingDate, notes):
+  tmdbId = recording[0]
+  isMovie = recording[1]
+  seasonNumber = recording[2]
+  episodeNumber = recording[3]
+
+  if seasonNumber:
+    if episodeNumber:
+      db.addEpisodesStorement(tmdbId, seasonNumber, episodeNumber, locationId, amount, recordingDate, notes)
+    else:
+      db.addSeasonsStorement(tmdbId, seasonNumber, locationId, amount, recordingDate, notes)
+  else:
+    db.addContentsStorement(tmdbId, isMovie, locationId, amount, recordingDate, notes)
+
+@eel.expose
+def deleteRecording(data):
+  tmdbId = data['tmdb_id']
+  isMovie = data['is_movie']
+  seasonNumber = data['season_number']
+  episodeNumber = data['episode_number']
+  locationId = data['location_id']
+
+  if seasonNumber:
+    if episodeNumber:
+      db.removeEpisodesStorement(tmdbId, seasonNumber, episodeNumber, locationId)
+    else:
+      db.removeSeasonsStorement(tmdbId, seasonNumber, locationId)
+  else:
+    db.removeContentsStorement(tmdbId, isMovie, locationId)
+
+# @eel.expose
+# def getFullTitle(tmdbId, seasonNumber, episodeNumber):
+#   contentTitle = db.getTvTitleByTmdbId(tmdbId)
+#   seasonTitle = ''
+#   episodeTitle = ''
+#   if seasonNumber:
+#     seasonTitle = ' / ' + db.getSeasonTitleByTmdbIdAndNumber(tmdbId, seasonNumber)
+#     if episodeNumber:
+#       episodeTitle = ' / ' + db.getEpisodeTitleByTmdbIdAndSeasonNumberAndNumber(tmdbId, seasonNumber, episodeNumber)
+#   fullTitle = contentTitle + seasonTitle + episodeTitle
+#   return fullTitle
+
+# print(getRecordings())
+# quit()
 
 eel.start('index.html')

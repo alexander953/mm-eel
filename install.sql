@@ -107,19 +107,19 @@ CREATE TABLE IF NOT EXISTS episodes_storement (
 CREATE TRIGGER IF NOT EXISTS updated_contents
 AFTER UPDATE ON contents
 BEGIN
-   UPDATE contents SET updated_on = CURRENT_TIMESTAMP WHERE id = NEW.id;
+   UPDATE contents SET updated_on = CURRENT_TIMESTAMP WHERE tmdb_id = NEW.tmdb_id AND is_movie = NEW.is_movie;
 END;
 
 CREATE TRIGGER IF NOT EXISTS updated_seasons
 AFTER UPDATE ON seasons
 BEGIN
-   UPDATE seasons SET updated_on = CURRENT_TIMESTAMP WHERE id = NEW.id;
+   UPDATE seasons SET updated_on = CURRENT_TIMESTAMP WHERE tmdb_id = NEW.tmdb_id AND number = NEW.number;
 END;
 
 CREATE TRIGGER IF NOT EXISTS updated_episodes
 AFTER UPDATE ON episodes
 BEGIN
-   UPDATE episodes SET updated_on = CURRENT_TIMESTAMP WHERE id = NEW.id;
+   UPDATE episodes SET updated_on = CURRENT_TIMESTAMP WHERE tmdb_id = NEW.tmdb_id AND season_number = NEW.season_number AND number = NEW.number;
 END;
 
 CREATE TRIGGER IF NOT EXISTS updated_locations
@@ -131,19 +131,19 @@ END;
 CREATE TRIGGER IF NOT EXISTS updated_contents_storement
 AFTER UPDATE ON contents_storement
 BEGIN
-   UPDATE contents_storement SET updated_on = CURRENT_TIMESTAMP WHERE id = NEW.id;
+   UPDATE contents_storement SET updated_on = CURRENT_TIMESTAMP WHERE tmdb_id = NEW.tmdb_id AND is_movie = NEW.is_movie AND location_id = NEW.location_id;
 END;
 
 CREATE TRIGGER IF NOT EXISTS updated_seasons_storement
 AFTER UPDATE ON seasons_storement
 BEGIN
-   UPDATE seasons_storement SET updated_on = CURRENT_TIMESTAMP WHERE id = NEW.id;
+   UPDATE seasons_storement SET updated_on = CURRENT_TIMESTAMP WHERE tmdb_id = NEW.tmdb_id AND number = NEW.number AND location_id = NEW.location_id;
 END;
 
 CREATE TRIGGER IF NOT EXISTS updated_episodes_storement
 AFTER UPDATE ON episodes_storement
 BEGIN
-   UPDATE episodes_storement SET updated_on = CURRENT_TIMESTAMP WHERE id = NEW.id;
+   UPDATE episodes_storement SET updated_on = CURRENT_TIMESTAMP WHERE tmdb_id = NEW.tmdb_id AND season_number = NEW.season_number AND number = NEW.number AND location_id = NEW.location_id;
 END;
 
 /* Make created_on read-only */

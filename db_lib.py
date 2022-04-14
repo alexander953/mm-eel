@@ -12,6 +12,8 @@ class Database:
     def __init__(self):
         self.con = sqlite3.connect("store.db")
         self.cur = self.con.cursor()
+        self.contentValues = ['title', '', '', 'description', 'release_date', 'age_restricted', 'rating', 'notes', 'amount', 'recording_date', 'notes', 'location_id']
+        self.contentSubValues = ['title', '', '', 'description', 'air_date', '', 'rating', 'notes', 'amount', 'recording_date', 'notes', 'location_id']
 
     def addMovie(self, movie):
         self.__init__()
@@ -50,8 +52,10 @@ class Database:
         self.__init__()
         try:
             req = TmdbRequests()
+            name = req.getSeriesById(tmdbId)['name']
             season = req.getSeasonByIdAndNumber(tmdbId, number)
-            season.update({ 'tmdbId': tmdbId })
+            seasonName = season['name']
+            season.update({ 'tmdbId': tmdbId, 'name': name + ' / ' + seasonName })
             if not season['poster_path']:
               season['poster_path'] = ''
             self.cur.execute(
@@ -66,10 +70,13 @@ class Database:
     def addEpisodeByTmdbIdAndNumber(self, tmdbId, seasonNumber, number):
         self.__init__()
         req = TmdbRequests()
+        name = req.getSeriesById(tmdbId)['name']
+        seasonName = req.getSeasonByIdAndNumber(tmdbId, seasonNumber)['name']
         episode = req.getEpisodeByIdAndNumber(tmdbId, seasonNumber, number)
+        episodeName = episode["name"]
         if not episode['still_path']:
             episode['still_path'] = ""
-        episode.update({ "tmdbId": tmdbId, "seasonNumber": seasonNumber })
+        episode.update({ "tmdbId": tmdbId, "seasonNumber": seasonNumber, "name": name + " / " + seasonName + " / " + episodeName })
         try:
             self.cur.execute(
                 """INSERT INTO episodes (tmdb_id, season_number, number, title, `description`, backdrop_path, air_date, rating)
@@ -351,20 +358,22 @@ class Database:
         self.__init__()
         try:
             self.cur.execute(
-                """SELECT c.title, '', '', c.description, c.release_date, c.age_restricted, c.rating, c.notes, s.notes, s.location_id FROM contents c
+                """SELECT co.title, '', '', co.description, co.release_date, co.age_restricted, co.rating, co.notes, st.amount, st.recording_date, st.notes, st.location_id, co.tmdb_id, co.is_movie FROM contents co
                     INNER JOIN
-                    contents_storement s
-                    ON c.tmdb_id = s.tmdb_id AND c.is_movie = s.is_movie
+                    contents_storement st
+                    ON co.tmdb_id = st.tmdb_id AND co.is_movie = st.is_movie
                     UNION ALL
-                    SELECT c.title, c.number, '', c.description, c.air_date, '', c.rating, c.notes, s.notes, s.location_id FROM seasons c
+                    SELECT se.title, se.number, '', se.description, se.air_date, '', se.rating, se.notes, st.amount, st.recording_date, st.notes, st.location_id, se.tmdb_id, 0 FROM
+                    seasons se
                     INNER JOIN
-                    seasons_storement s
-                    ON c.tmdb_id = s.tmdb_id AND c.number = s.season_number
+                    seasons_storement st
+                    ON se.tmdb_id = st.tmdb_id AND se.number = st.season_number
                     UNION ALL
-                    SELECT e.title, e.season_number, e.number, e.description, e.air_date, '', e.rating, e.notes, s.notes, s.location_id FROM episodes e
-                    INNER JOIN
-                    episodes_storement s
-                    ON e.tmdb_id = s.tmdb_id AND e.season_number = s.season_number AND e.number = s.episode_number;"""
+                    SELECT ep.title, ep.season_number, ep.number, ep.description, ep.air_date, '', ep.rating, ep.notes, st.amount, st.recording_date, st.notes, st.location_id, ep.tmdb_id, 0 FROM
+                    episodes ep
+                    LEFT JOIN
+                    episodes_storement st
+                    ON ep.tmdb_id = st.tmdb_id AND ep.season_number = st.season_number AND ep.number = st.episode_number;"""
             )
             return self.cur.fetchall()
         except sqlite3.Error as err:
@@ -387,8 +396,220 @@ class Database:
         return None
     
     def handleError(self, err):
+        print(err)
         print("SQLite error: %s" % (" ".join(err.args)))
         print("Exception class is: ", err.__class__)
         print("SQLite traceback: ")
         exc_type, exc_value, exc_tb = sys.exc_info()
         print(traceback.format_exception(exc_type, exc_value, exc_tb))
+
+    def getLocations(self):
+        self.__init__()
+        try:
+            self.cur.execute(
+                """SELECT id FROM locations;"""
+            )
+            return self.cur.fetchall()
+        except sqlite3.Error as err:
+            self.handleError(err)
+        return None
+    
+    def updateContent(self, tmdbId, isMovie, index, data):
+        self.__init__()
+        try:
+            self.cur.execute(
+                """UPDATE contents
+                    SET {0} = :data
+                    WHERE tmdb_id = :tmdbId
+                    AND is_movie = :isMovie""".format(self.contentValues[index]),
+                {
+                    "data": data,
+                    "tmdbId": tmdbId,
+                    "isMovie": isMovie
+                }
+            )
+            self.con.commit()
+        except sqlite3.Error as err:
+            self.handleError(err)
+        return None
+
+    def updateSeason(self, tmdbId, seasonNumber, index, data):
+        self.__init__()
+        try:
+            self.cur.execute(
+                """UPDATE seasons
+                    SET {0} = :data
+                    WHERE tmdb_id = :tmdbId
+                    AND number = :seasonNumber""".format(self.contentSubValues[index]),
+                {
+                    "data": data,
+                    "tmdbId": tmdbId,
+                    "seasonNumber": seasonNumber
+                }
+            )
+            self.con.commit()
+        except sqlite3.Error as err:
+            self.handleError(err)
+        return None
+
+    def updateEpisode(self, tmdbId, seasonNumber, episodeNumber, index, data):
+        self.__init__()
+        try:
+            self.cur.execute(
+                """UPDATE episodes
+                    SET {0} = :data
+                    WHERE tmdb_id = :tmdbId
+                    AND season_number = :seasonNumber
+                    AND number = :episodeNumber""".format(self.contentSubValues[index]),
+                {
+                    "data": data,
+                    "tmdbId": tmdbId,
+                    "seasonNumber": seasonNumber,
+                    "episodeNumber": episodeNumber
+                }
+            )
+            self.con.commit()
+        except sqlite3.Error as err:
+            self.handleError(err)
+        return None
+
+    def updateContentsStorement(self, tmdbId, isMovie, locationId, index, data):
+        self.__init__()
+        try:
+            self.cur.execute(
+                """UPDATE contents_storement
+                    SET {0} = :data
+                    WHERE tmdb_id = :tmdbId
+                    AND is_movie = :isMovie
+                    AND location_id = :locationId""".format(self.contentValues[index]),
+                {
+                    "data": data,
+                    "tmdbId": tmdbId,
+                    "isMovie": isMovie,
+                    "locationId": locationId
+                }
+            )
+            self.con.commit()
+        except sqlite3.Error as err:
+            self.handleError(err)
+        return None
+
+    def updateSeasonsStorement(self, tmdbId, seasonNumber, locationId, index, data):
+        self.__init__()
+        try:
+            self.cur.execute(
+                """UPDATE seasons_storement
+                    SET {0} = :data
+                    WHERE tmdb_id = :tmdbId
+                    AND season_number = :seasonNumber
+                    AND location_id = :locationId""".format(self.contentSubValues[index]),
+                {
+                    "data": data,
+                    "tmdbId": tmdbId,
+                    "seasonNumber": seasonNumber,
+                    "locationId": locationId
+                }
+            )
+            self.con.commit()
+        except sqlite3.Error as err:
+            self.handleError(err)
+        return None
+
+    def updateEpisodesStorement(self, tmdbId, seasonNumber, episodeNumber, locationId, index, data):
+        self.__init__()
+        try:
+            self.cur.execute(
+                """UPDATE episodes_storement
+                    SET {0} = :data
+                    WHERE tmdb_id = :tmdbId
+                    AND season_number = :seasonNumber
+                    AND episode_number = :episodeNumber
+                    AND location_id = :locationId""".format(self.contentSubValues[index]),
+                {
+                    "data": data,
+                    "tmdbId": tmdbId,
+                    "seasonNumber": seasonNumber,
+                    "episodeNumber": episodeNumber,
+                    "locationId": locationId
+                }
+            )
+            self.con.commit()
+        except sqlite3.Error as err:
+            self.handleError(err)
+        return None
+    
+    def getPossessions(self):
+        self.__init__()
+        try:
+            self.cur.execute(
+                """SELECT tmdb_id, is_movie, '', '', title from contents
+                    UNION ALL
+                    SELECT tmdb_id, '', number, '', title from seasons
+                    UNION ALL
+                    SELECT tmdb_id, '', season_number, number, title from episodes"""
+            )
+            return self.cur.fetchall()
+        except sqlite3.Error as err:
+            self.handleError(err)
+        return None
+    
+    # def getTvTitleByTmdbId(self, tmdbId):
+    #     self.__init__()
+    #     try:
+    #         self.cur.execute(
+    #             """SELECT title FROM contents
+    #                 WHERE tmdb_id = :tmdbId AND is_movie = 0;""",
+    #             {
+    #                 "tmdbId": tmdbId
+    #             }
+    #         )
+    #         result = self.cur.fetchone()
+    #         if result:
+    #             return result[0]
+    #         else:
+    #             return '...'
+    #     except sqlite3.Error as err:
+    #         self.handleError(err)
+    #     return None
+    
+    # def getSeasonTitleByTmdbIdAndNumber(self, tmdbId, number):
+    #     self.__init__()
+    #     try:
+    #         self.cur.execute(
+    #             """SELECT title FROM seasons
+    #                 WHERE tmdb_id = :tmdbId AND number = :number;""",
+    #             {
+    #                 "tmdbId": tmdbId,
+    #                 "number": number
+    #             }
+    #         )
+    #         result = self.cur.fetchone()
+    #         if result:
+    #             return result[0]
+    #         else:
+    #             return '...'
+    #     except sqlite3.Error as err:
+    #         self.handleError(err)
+    #     return None
+    
+    # def getEpisodeTitleByTmdbIdAndSeasonNumberAndNumber(self, tmdbId, seasonNumber, number):
+    #     self.__init__()
+    #     try:
+    #         self.cur.execute(
+    #             """SELECT title FROM episodes
+    #                 WHERE tmdb_id = :tmdbId AND season_number = :seasonNumber AND number = :number;""",
+    #             {
+    #                 "tmdbId": tmdbId,
+    #                 "seasonNumber": seasonNumber,
+    #                 "number": number
+    #             }
+    #         )
+    #         result = self.cur.fetchone()
+    #         if result:
+    #             return result[0]
+    #         else:
+    #             return '...'
+    #     except sqlite3.Error as err:
+    #         self.handleError(err)
+        return None
+    

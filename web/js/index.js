@@ -122,10 +122,10 @@ async function addContentCard(data, type = 'movie') {
   // movieCardButton.addEventListener('click', function () {
   //   switch (this.dataset.action) {
   //     case 'add':
-  //       console.log('add ' + id);
+        // console.log('add ' + id);
   //       break;
   //     case 'edit':
-  //       console.log('edit ' + id);
+        // console.log('edit ' + id);
   //       break;
   //     default:
   //       break;
@@ -389,16 +389,20 @@ async function addContentCard(data, type = 'movie') {
         episodeButton.classList.add('btn', 'btn-outline-secondary', 'episode-action');
         episodeButton.innerText = episodeOwned ? 'Entfernen' : 'Hinzufügen';
         episodeButton.dataset.action = episodeOwned ? 'remove' : 'add';
-        episodeButton.addEventListener('click', function () {
+        episodeButton.addEventListener('click', async function () {
           switch (this.dataset.action) {
             case 'add':
               eel.addEpisodeByTmdbIdAndNumber(id, season.season_number, episode.episode_number);
+              await displayRecordings();
+              await fillAddRecordingForm();
               this.dataset.action = 'remove';
               this.innerText = 'Entfernen';
               episodeCard.classList.add('text-white', 'bg-dark');
               break;
             case 'remove':
               eel.removeEpisodeByIdAndNumber(id, season.season_number, episode.episode_number);
+              await displayRecordings();
+              await fillAddRecordingForm();
               this.dataset.action = 'add';
               this.innerText = 'Hinzufügen';
               episodeCard.classList.remove('text-white', 'bg-dark');
@@ -439,16 +443,20 @@ async function addContentCard(data, type = 'movie') {
       seasonButton.classList.add('btn', 'btn-outline-secondary', 'season-action');
       seasonButton.innerText = seasonOwned ? 'Entfernen' : 'Hinzufügen';
       seasonButton.dataset.action = seasonOwned ? 'remove' : 'add';
-      seasonButton.addEventListener('click', function () {
+      seasonButton.addEventListener('click', async function () {
         switch (this.dataset.action) {
           case 'add':
             eel.addSeasonByTmdbIdAndNumber(id, season.season_number);
+            await displayRecordings();
+            await fillAddRecordingForm();
             this.dataset.action = 'remove';
             this.innerText = 'Entfernen';
             seasonCard.classList.add('text-white', 'bg-dark');
             break;
           case 'remove':
             eel.removeSeasonByIdAndNumber(id, season.season_number);
+            await displayRecordings();
+            await fillAddRecordingForm();
             this.dataset.action = 'add';
             this.innerText = 'Hinzufügen';
             seasonCard.classList.remove('text-white', 'bg-dark');
@@ -487,15 +495,19 @@ async function addContentCard(data, type = 'movie') {
   modalButton.classList.add('btn', 'btn-outline-secondary', 'content-action');
   modalButton.innerText = owned ? 'Entfernen' : 'Hinzufügen';
   modalButton.dataset.action = owned ? 'remove' : 'add';
-  modalButton.addEventListener('click', function () {
+  modalButton.addEventListener('click', async function () {
     switch (this.dataset.action) {
       case 'add':
         switch (type) {
           case 'movie':
             eel.addMovie(data);
+            await displayRecordings();
+            await fillAddRecordingForm();
             break;
           case 'tv':
             eel.addSeriesByTmdbId(id);
+            await displayRecordings();
+            await fillAddRecordingForm();
             break;
           default:
             break;
@@ -510,6 +522,8 @@ async function addContentCard(data, type = 'movie') {
       case 'remove':
         // console.log('remove ' + id);
         eel.removeContent(id);
+        await displayRecordings();
+        await fillAddRecordingForm();
         this.dataset.action = 'add';
         this.innerText = 'Hinzufügen';
         movieCard.classList.remove('text-white', 'bg-dark');
@@ -561,8 +575,8 @@ function clearResults(target) {
 async function printLocations(id, parent = '') {
   let locations = await eel.getLocationsByParentId(id)();
   locations.forEach(function (location) {
-    console.log(location[0])
-    console.log(parent + location[1] + ': ' + location[2]);
+    // console.log(lo// // cation[0])
+    // console.log(parent + lo// // cation[1] + ': ' + lo// // cation[2]);
     printLocations(location[0], location[1] + ' > ');
   });
 }
@@ -681,6 +695,7 @@ async function displayAddLocationForm(target, parentLocationId) {
     await eel.addLocation(parentLocationId, locationName, locationDesc);
     document.getElementById('store').innerHTML = '';
     displayLocations(null);
+    await fillAddRecordingForm();
   });
 
   addLocationForm.append(locationNameGroup);
@@ -706,25 +721,198 @@ async function addEpisodesStorement(tmdbId, seasonNumber, episodeNumber, locatio
   await eel.addEpisodesStorement(tmdbId, seasonNumber, episodeNumber, locationId, amount, recordingDate, notes);
 }
 
+async function fillAddRecordingForm() {
+  let possessions = await eel.getPossessions()();
+  // console.log(possessions)
+  let fullLocations = await eel.getFullLocations()();
+  // console.log(possessions, fullLo// cations);
+  let recordingSelect = document.getElementById('recording');
+  recordingSelect.innerHTML = '';
+  let locationSelect = document.getElementById('location');
+  locationSelect.innerHTML = '';
+  let addRecordingButton = document.getElementById('add-recording');
+  let amountInput = document.getElementById('amount');
+  let recordingDateInput = document.getElementById('recording-date');
+  let notesInput = document.getElementById('notes');
+  possessions.forEach(async function (possession, index) {
+    // console.log(possession)
+    let option = document.createElement('option');
+    // console.log(possession)
+    // let fullTitle = await eel.getFullTitle(possession[0], possession[2], possession[3])();
+    // option.innerText = fullTitle;
+    option.innerText = possession[4];
+    option.value = index;
+    recordingSelect.append(option);
+  });
+  fullLocations.forEach(function (fullLocation, index) {
+    let option = document.createElement('option');
+    option.innerText = fullLocation[1];
+    option.value = index;
+    locationSelect.append(option);
+  });
+  addRecordingButton.addEventListener('click', async function () {
+    eel.addRecording(possessions[recordingSelect.value].slice(0, 4), fullLocations[locationSelect.value][0], amountInput.value, recordingDateInput.value, notesInput.value);
+    await displayRecordings();
+  });
+}
+
 async function displayRecordings() {
+  let locations = await eel.getFullLocations()();
   let recordings = await eel.getRecordings()();
   let tableBody = document.getElementById('recordings-data');
+  tableBody.innerHTML = '';
   recordings.forEach(async function (recording) {
-    let tr = document.createElement('tr')
     console.log(recording)
+    let tr = document.createElement('tr');
+    let deleteTd = document.createElement('td');
+    let deleteButton = document.createElement('button');
+    deleteButton.classList.add('btn', 'btn-danger');
+    deleteButton.innerText = 'Löschen';
+    deleteButton.addEventListener('click', async function () {
+      let requestBody = {
+        tmdb_id: recording[12],
+        is_movie: recording[13],
+        season_number: recording[1],
+        episode_number: recording[2],
+        location_id: recording[11]
+      };
+      eel.deleteRecording(requestBody);
+      await displayRecordings();
+      // console.log(requestBody);
+    });
+    deleteTd.append(deleteButton);
+    tr.append(deleteTd);
+    // console.log(re// // cording)
     recording.forEach(async function (data, index) {
+      if (index > 11) return;
       let td = document.createElement('td');
+      let p = document.createElement('p');
       let tdContent = '';
-      if (index == 9) {
-        tdContent = await eel.getFullLocationById(data)();
-      } else {
-        tdContent = data;
+      switch (index) {
+        case 3:
+          tdContent = data ? data.toString().substring(0, 30) + '...' : '';
+          break;
+        case 4:
+        case 9:
+          tdContent = data ? data.split('-').reverse().join('.') : '';
+          break;
+        case 5:
+          tdContent = data ? 'ja' : 'nein';
+          break;
+        case 6:
+          tdContent = data ? data.toString().replace('.', ',') : '';
+          break;
+        case 11:
+          tdContent = await eel.getFullLocationById(data)();
+          break;
+        default:
+          tdContent = data;
+          break;
       }
-      td.innerText = tdContent;
+      p.innerText = tdContent;
+      td.append(p);
+      // TODO: Add recording form
+      if ((index < 1 || index > 2) && index != 11) {
+        let updateContainer = document.createElement('div');
+        updateContainer.classList.add('d-none');
+        let updateInput = [3, 7, 10].includes(index) ? document.createElement('textarea') : (index == 11 ? document.createElement('select') : document.createElement('input'));
+        switch (index) {
+          case 0:
+            updateInput.type = 'text';
+            break;
+          case 4:
+          case 9:
+            updateInput.type = 'date';
+            break;
+          case 5:
+            updateInput.type = 'checkbox';
+            break;
+          case 6:
+            updateInput.type = 'number';
+            updateInput.step = '0.01';
+            break;
+          case 8:
+            updateInput.type = 'number';
+            updateInput.step = '1';
+            break;
+          case 11:
+            locations.forEach(function (location) {
+              let option = document.createElement('option');
+              option.value = location[0];
+              option.innerText = location[1];
+              updateInput.append(option);
+            });
+            break;
+          default:
+            break;
+        }
+        if (index == 5) {
+          if (data) updateInput.classList.add('checked');
+        } else {
+          updateInput.value = data;
+        }
+        let updateButton = document.createElement('button');
+        updateButton.classList.add('btn', 'btn-secondary');
+        updateButton.innerText = 'Speichern';
+        updateContainer.append(updateInput);
+        updateContainer.append(updateButton);
+        td.append(updateContainer);
+        td.addEventListener('click', function (e) {
+          // console.log(e)
+          let currentDiv = this.querySelector('div');
+          if (currentDiv.classList.contains('d-none')) {
+            this.querySelector('p').classList.toggle('d-none');
+            currentDiv.classList.toggle('d-none');
+          }
+        });
+        updateButton.addEventListener('click', async function (e) {
+          e.stopPropagation();
+          let currentTr = this.closest('tr');
+          let currentTd = this.closest('td');
+          let newVal;
+          newVal = index == 5 ? updateInput.checked : updateInput.value;
+          let requestBody = {
+            tmdb_id: recording[12],
+            is_movie: recording[13],
+            season_number: currentTr.children[2].querySelector('p').innerText,
+            episode_number: currentTr.children[3].querySelector('p').innerText,
+            location_id: recording[11],
+            index: index,
+            data: newVal
+          }
+          eel.updateStorement(requestBody);
+          let updatedVal;
+          switch (index) {
+            case 3:
+              updatedVal = newVal.substring(0, 30) + '...';
+              break;
+            case 4:
+            case 9:
+              updatedVal = newVal.split('-').reverse().join('.');
+              break;
+            case 5:
+              updatedVal = newVal ? 'ja' : 'nein';
+              break;
+            case 6:
+              updatedVal = newVal.toString().replace('.', ',');
+              break;
+            default:
+              updatedVal = newVal;
+              break;
+          }
+          currentTd.querySelector('p').innerText = updatedVal;
+          currentTd.querySelector('p').classList.toggle('d-none');
+          currentTd.querySelector('div').classList.toggle('d-none');
+        });
+      }
+
       tr.append(td);
     });
     tableBody.append(tr);
   });
 }
 
-displayRecordings();
+document.querySelector('.nav-link[data-link=recordings]').addEventListener('click', async function() {
+  await fillAddRecordingForm();
+  await displayRecordings();
+});
