@@ -613,3 +613,46 @@ class Database:
     #         self.handleError(err)
     #    return None
     
+    def getPossessionsCount(self):
+        self.__init__()
+        try:
+            self.cur.execute("""
+                SELECT COUNT(*) AS contents_count FROM contents
+                UNION ALL
+                SELECT COUNT(*) AS seasons_count FROM seasons
+                UNION ALL
+                SELECT COUNT(*) AS episodes_count FROM episodes;
+            """)
+            return self.cur.fetchall()
+        except sqlite3.Error as err:
+            self.handleError(err)
+        return None
+    
+    def getLocationsCount(self):
+        self.__init__()
+        try:
+            self.cur.execute(
+                """
+                SELECT COUNT(*) AS locations_count FROM locations;"""
+            )
+            return self.cur.fetchone()
+        except sqlite3.Error as err:
+            self.handleError(err)
+        return None
+    
+    def getAssignedPossessionsCount(self):
+        self.__init__()
+        try:
+            self.cur.execute(
+                """
+                    SELECT COUNT(DISTINCT tmdb_id || '' || is_movie) FROM contents_storement
+                    UNION ALL
+                    SELECT COUNT(DISTINCT tmdb_id || '' || season_number) FROM seasons_storement
+                    UNION ALL
+                    SELECT COUNT(DISTINCT tmdb_id || '' || season_number || '' || episode_number) FROM episodes_storement;
+                """
+            )
+            return self.cur.fetchall()
+        except sqlite3.Error as err:
+            self.handleError(err)
+        return None

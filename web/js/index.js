@@ -66,6 +66,26 @@ async function displayResults(searchTerm = null) {
 
 const tmdbRequests = new TmdbRequests();
 
+window.addEventListener('load', async function () {
+  let contentsCounter = document.getElementById('contentsCount');
+  let seasonsCounter = document.getElementById('seasonsCount');
+  let episodesCounter = document.getElementById('episodesCount');
+  let locationsCounter = document.getElementById('locationsCount');
+  let assignedContentsCount = document.getElementById('assignedContentsCount');
+  let assignedSeasonsCount = document.getElementById('assignedSeasonsCount');
+  let assignedEpisodesCount = document.getElementById('assignedEpisodesCount');
+
+  let possessionsCount = await eel.getPossessionsCount()();
+  contentsCounter.innerText = possessionsCount[0][0];
+  seasonsCounter.innerText = possessionsCount[1][0];
+  episodesCounter.innerText = possessionsCount[2][0];
+  locationsCounter.innerText = await eel.getLocationsCount()();
+  let assignedPossessionsCount = await eel.getAssignedPossessionsCount()();
+  assignedContentsCount.innerText = assignedPossessionsCount[0][0];
+  assignedSeasonsCount.innerText = assignedPossessionsCount[1][0];
+  assignedEpisodesCount.innerText = assignedPossessionsCount[2][0];
+});
+
 document.querySelector('.nav-link[data-link=discover]').addEventListener('click', async function() {
   displayResults();
 });

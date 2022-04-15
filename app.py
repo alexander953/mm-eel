@@ -246,4 +246,16 @@ def deleteRecording(data):
 # print(getRecordings())
 # quit()
 
+@eel.expose
+def getPossessionsCount():
+  return db.getPossessionsCount()
+
+@eel.expose
+def getLocationsCount():
+  return db.getLocationsCount()
+
+@eel.expose
+def getAssignedPossessionsCount():
+  return db.getAssignedPossessionsCount()
+
 eel.start('index.html')
