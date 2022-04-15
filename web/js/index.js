@@ -1,4 +1,5 @@
 const pages = ['dashboard', 'discover', 'recordings', 'store'];
+let resultsDisplayed = false;
 
 pages.forEach(function (page) {
   document.querySelector(`.nav-link[data-link=${page}]`).addEventListener('click', function (event) {
@@ -40,6 +41,7 @@ class TmdbRequests {
 let trendingMovies, trendingTv;
 
 async function displayResults(searchTerm = null) {
+  if (resultsDisplayed) return;
   startLoadingAnimation('movie');
   startLoadingAnimation('tv');
   trendingMovies = await tmdbRequests.getContents({ searchTerm: searchTerm });
@@ -58,6 +60,8 @@ async function displayResults(searchTerm = null) {
   });
   stopLoadingAnimation('movie');
   stopLoadingAnimation('tv');
+
+  resultsDisplayed = true;
 }
 
 const tmdbRequests = new TmdbRequests();
@@ -67,11 +71,13 @@ document.querySelector('.nav-link[data-link=discover]').addEventListener('click'
 });
 
 document.getElementById('search-item').addEventListener('click', async function () {
+  resultsDisplayed = false;
   displayResults(document.getElementById('search-term').value);
 });
 
 document.getElementById('search-term').addEventListener('keydown', async function(e) {
   if (e.key == 'Enter') {
+    resultsDisplayed = false;
     displayResults(document.getElementById('search-term').value);
   }
 })
@@ -575,8 +581,6 @@ function clearResults(target) {
 async function printLocations(id, parent = '') {
   let locations = await eel.getLocationsByParentId(id)();
   locations.forEach(function (location) {
-    // console.log(lo// // cation[0])
-    // console.log(parent + lo// // cation[1] + ': ' + lo// // cation[2]);
     printLocations(location[0], location[1] + ' > ');
   });
 }
@@ -725,7 +729,8 @@ async function fillAddRecordingForm() {
   let possessions = await eel.getPossessions()();
   // console.log(possessions)
   let fullLocations = await eel.getFullLocations()();
-  // console.log(possessions, fullLo// cations);
+  // console.log(fullLocations)
+  // console.log(possessions, fullLocations);
   let recordingSelect = document.getElementById('recording');
   recordingSelect.innerHTML = '';
   let locationSelect = document.getElementById('location');
@@ -744,10 +749,11 @@ async function fillAddRecordingForm() {
     option.value = index;
     recordingSelect.append(option);
   });
+  // console.log(fullLocations)
   fullLocations.forEach(function (fullLocation, index) {
     let option = document.createElement('option');
     option.innerText = fullLocation[1];
-    option.value = index;
+    option.value = fullLocation[0];
     locationSelect.append(option);
   });
   addRecordingButton.addEventListener('click', async function () {
@@ -762,7 +768,7 @@ async function displayRecordings() {
   let tableBody = document.getElementById('recordings-data');
   tableBody.innerHTML = '';
   recordings.forEach(async function (recording) {
-    console.log(recording)
+    // console.log(recording)
     let tr = document.createElement('tr');
     let deleteTd = document.createElement('td');
     let deleteButton = document.createElement('button');
@@ -782,7 +788,6 @@ async function displayRecordings() {
     });
     deleteTd.append(deleteButton);
     tr.append(deleteTd);
-    // console.log(re// // cording)
     recording.forEach(async function (data, index) {
       if (index > 11) return;
       let td = document.createElement('td');
@@ -858,7 +863,6 @@ async function displayRecordings() {
         updateContainer.append(updateButton);
         td.append(updateContainer);
         td.addEventListener('click', function (e) {
-          // console.log(e)
           let currentDiv = this.querySelector('div');
           if (currentDiv.classList.contains('d-none')) {
             this.querySelector('p').classList.toggle('d-none');

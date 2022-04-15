@@ -371,7 +371,7 @@ class Database:
                     UNION ALL
                     SELECT ep.title, ep.season_number, ep.number, ep.description, ep.air_date, '', ep.rating, ep.notes, st.amount, st.recording_date, st.notes, st.location_id, ep.tmdb_id, 0 FROM
                     episodes ep
-                    LEFT JOIN
+                    INNER JOIN
                     episodes_storement st
                     ON ep.tmdb_id = st.tmdb_id AND ep.season_number = st.season_number AND ep.number = st.episode_number;"""
             )
@@ -611,5 +611,5 @@ class Database:
     #             return '...'
     #     except sqlite3.Error as err:
     #         self.handleError(err)
-        return None
+    #    return None
     

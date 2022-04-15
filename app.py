@@ -144,11 +144,12 @@ def getRecordings():
 @eel.expose
 def getFullLocationById(id):
   fullLocation = ''
-  if not fullLocation:
-    return ''
   # TODO: Move this to config
   separator = ' / '
   location = db.getLocationById(id)
+  if not location:
+    return
+  # print(location)
   fullLocation = location[1]
   parentLocationId = location[0]
   while parentLocationId:
@@ -172,7 +173,7 @@ def updateStorement(data):
   tmdbId = data['tmdb_id']
   seasonNumber = data['season_number']
   episodeNumber = data['episode_number']
-  print(data)
+  # print(data)
   index = data['index']
   value = data['data']
   locationId = data['location_id']
